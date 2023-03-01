@@ -13,4 +13,7 @@ public class Orgnization {
     private String adminaccount;
     private String locate;
     private String remark;
+    private String characteristic;
+    private String conact;
+    private String phonenumber;
 }

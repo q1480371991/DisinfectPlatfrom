@@ -30,8 +30,17 @@ public class UserServiceImp implements UserService {
     private OrgnizationMapper orgnizationMapper;
     @Autowired
     private ProjectUserMapper project_userMapper;
+
+    /*
+     * @title :ListAllUser
+     * @Author :Lin
+     * @Description : 获取所有账号信息，仅限海威账号
+     * @Date :22:39 2023/3/1
+     * @Param :[]
+     * @return :java.util.Collection<com.example.disinfectplatfrom.Pojo.User>
+     **/
     @Override
-    public Collection<User> ListAllUser()//海威账号功能
+    public Collection<User> ListAllUser()
     {
         QueryWrapper<User> queryWrapper = new QueryWrapper<User>();
         queryWrapper.select(User.class, info ->!info.getColumn().equals("password"));//查询指定某字段以外的数据
@@ -42,6 +51,14 @@ public class UserServiceImp implements UserService {
         return Users;
     }
 
+    /*
+     * @title :UpdatePassword
+     * @Author :Lin
+     * @Description : 修改账号密码
+     * @Date :22:40 2023/3/1
+     * @Param :[password]
+     * @return :void
+     **/
     @Override
     public void UpdatePassword(String password) {
         //获取当前用户信息
@@ -56,6 +73,14 @@ public class UserServiceImp implements UserService {
         userMapper.updateById(user);
     }
 
+    /*
+     * @title :ListUserByProjectId
+     * @Author :Lin
+     * @Description : 获取项目下所有账号信息
+     * @Date :22:40 2023/3/1
+     * @Param :[projectid]
+     * @return :java.util.Collection<com.example.disinfectplatfrom.Pojo.User>
+     **/
     @Override
     public Collection<User> ListUserByProjectId(int projectid) {
 //        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -77,6 +102,14 @@ public class UserServiceImp implements UserService {
         return users;
     }
 
+    /*
+     * @title :ListUserByProjectAdminId
+     * @Author :Lin
+     * @Description : 获取项目管理员所有项目下的账号信息
+     * @Date :22:41 2023/3/1
+     * @Param :[]
+     * @return :java.util.Collection<com.example.disinfectplatfrom.Pojo.User>
+     **/
     @Override
     public Collection<User> ListUserByProjectAdminId() {
         Collection<User> res=new ArrayList<User>();
@@ -92,6 +125,14 @@ public class UserServiceImp implements UserService {
         return res;
     }
 
+    /*
+     * @title :ListAllProject
+     * @Author :Lin
+     * @Description : 获取所有项目信息
+     * @Date :22:41 2023/3/1
+     * @Param :[]
+     * @return :java.util.Collection<com.example.disinfectplatfrom.Pojo.Project>
+     **/
     @Override
     public Collection<Project> ListAllProject() {
         List<Project> projects = projectMapper.selectList(new LambdaQueryWrapper<Project>());
@@ -99,17 +140,46 @@ public class UserServiceImp implements UserService {
         return projects;
     }
 
+    /*
+     * @title :AddProject
+     * @Author :Lin
+     * @Description : 新增项目，仅限海威账号
+     * @Date :22:42 2023/3/1
+     * @Param :[project]
+     * @return :void
+     **/
     @Override
     public void AddProject(Project project) {
         projectMapper.insert(project);
     }
 
+    /*
+     * @title :UpdateProjectId
+     * @Author :Lin
+     * @Description : 更新项目
+     * @Date :22:42 2023/3/1
+     * @Param :[id, projectname, remark]
+     * @return :void
+     **/
     @Override
-    public void UpdateProject(int id, String projectname, String remark) {
+    public void UpdateProjectById(int id, String projectname, String remark) {
         Project project = projectMapper.selectById(id);
         project.setProjectname(projectname);
         project.setRemark(remark);
         projectMapper.updateById(project);
+    }
+
+    /*
+     * @title :ListUserByOrgnizationId
+     * @Author :Lin
+     * @Description : 获取组织下的所有账号信息
+     * @Date :22:43 2023/3/1
+     * @Param :[id]
+     * @return :java.util.Collection<com.example.disinfectplatfrom.Pojo.User>
+     **/
+    @Override
+    public Collection<User> ListUserByOrgnizationId(int id) {
+        return null;
     }
 
 }

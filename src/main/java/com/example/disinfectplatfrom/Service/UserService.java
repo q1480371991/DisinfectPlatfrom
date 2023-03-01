@@ -7,6 +7,7 @@ import org.apache.ibatis.annotations.Update;
 import java.util.Collection;
 
 public interface UserService {
+
     public Collection<User> ListAllUser();//海威账号功能
 
 //    @Update("update user set password=#{password} where id=#{id}")
@@ -23,5 +24,8 @@ public interface UserService {
     //添加项目，仅海威账号
     public void AddProject(Project project);
     //编辑项目，仅海威账号
-    public void UpdateProject(int id,String projectname,String remark);
+    public void UpdateProjectById(int id,String projectname,String remark);
+
+    //返回组织下的用户账号
+    public Collection<User> ListUserByOrgnizationId(int id);
 }
