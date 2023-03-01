@@ -1,0 +1,10 @@
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/platform_db
+    username: root
+    password: "020623"
+    type: com.alibaba.druid.pool.DruidDataSource
+#mybatis-plus:
+#  configuration:
+#    map-underscore-to-camel-case: false
