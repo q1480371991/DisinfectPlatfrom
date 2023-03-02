@@ -178,8 +178,14 @@ public class UserServiceImp implements UserService {
      * @return :java.util.Collection<com.example.disinfectplatfrom.Pojo.User>
      **/
     @Override
-    public Collection<User> ListUserByOrgnizationId(int id) {
-        return null;
+    public Collection<User> ListUserByOrgnizationId(int projectid) {
+//        return userMapper.ListUserByOrgnizationId(id);
+        Collection<Integer> userids = userMapper.ListUserIdInOrgnizationById(projectid);
+        LambdaQueryWrapper<User> lqw = new LambdaQueryWrapper<User>();
+        lqw.in(User::getId,userids);
+        List<User> users = userMapper.selectList(lqw);
+        return users;
     }
+
 
 }

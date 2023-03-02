@@ -21,6 +21,6 @@ public class tset {
     UserMapper userMapper;
     @Test
     public void test1(){
-
+        System.out.println(userMapper.ListUserIdInProjectById(1));
     }
 }

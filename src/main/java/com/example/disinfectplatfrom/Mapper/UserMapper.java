@@ -14,8 +14,9 @@ import java.util.Collection;
 @Repository
 public interface UserMapper extends BaseMapper<User> {
 
-//    @Select("select *  from user")
-//    public Collection<User> SelectUserByUsername();
 
-    public Collection<User> ListUserByProject(int projectid);
+    @Select("SELECT userid FROM ` orgnization_user` WHERE orgnizationid =#{orgnizationid}")
+    public Collection<Integer> ListUserIdInOrgnizationById(int orgnizationid);
+    @Select("SELECT userid FROM project_user WHERE projectid=#{projectid}")
+    public Collection<Integer> ListUserIdInProjectById(int projectid);
 }

@@ -16,14 +16,13 @@ public class User implements UserDetails {
     @TableId(value = "id", type = IdType.AUTO)
     private Integer id;
     private String username;
+    @TableField(select = false)
     private String password;
     private int status;
     private String email;
     private String phonenumber;
     private int sex;
-//    @TableField(value = "create_time")
     private String createtime;
-//    @TableField(value = "update_time")
     private String updatetime;
     private int del_flag;
     private int isdefault;
