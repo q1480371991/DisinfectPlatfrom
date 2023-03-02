@@ -48,6 +48,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.authorizeHttpRequests()
+                .mvcMatchers("/vc.jpg").permitAll()
                 .anyRequest().authenticated()//所有请求必须认证
                 .and().formLogin()
                 .and()
@@ -61,6 +62,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                     String s = new ObjectMapper().writeValueAsString(result);
                     resp.getWriter().println(s);
                 })
+                .and()
+                .rememberMe()//开启记住我功能
                 .and()
                 .exceptionHandling()
                 .authenticationEntryPoint((req,resp,ex)->{

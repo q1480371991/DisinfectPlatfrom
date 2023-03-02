@@ -4,10 +4,8 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.example.disinfectplatfrom.Mapper.OrgnizationMapper;
 import com.example.disinfectplatfrom.Mapper.ProjectMapper;
-import com.example.disinfectplatfrom.Mapper.ProjectUserMapper;
 import com.example.disinfectplatfrom.Mapper.UserMapper;
 import com.example.disinfectplatfrom.Pojo.Project;
-import com.example.disinfectplatfrom.Pojo.ProjectUser;
 import com.example.disinfectplatfrom.Pojo.User;
 import com.example.disinfectplatfrom.Service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +16,6 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.function.Consumer;
 
 @Service
 public class UserServiceImp implements UserService {
@@ -28,8 +25,6 @@ public class UserServiceImp implements UserService {
     private ProjectMapper projectMapper;
     @Autowired
     private OrgnizationMapper orgnizationMapper;
-    @Autowired
-    private ProjectUserMapper project_userMapper;
 
     /*
      * @title :ListAllUser
@@ -81,24 +76,11 @@ public class UserServiceImp implements UserService {
      * @Param :[projectid]
      * @return :java.util.Collection<com.example.disinfectplatfrom.Pojo.User>
      **/
-    @Override
     public Collection<User> ListUserByProjectId(int projectid) {
-//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-//        User currentUser = (User)authentication.getPrincipal();
         LambdaQueryWrapper<User> userlqw = new LambdaQueryWrapper<User>();
-        LambdaQueryWrapper<ProjectUser> project_userlqw = new LambdaQueryWrapper<ProjectUser>();
-        project_userlqw.select(ProjectUser::getUserid).eq(ProjectUser::getProjectid,projectid);
-        Collection<ProjectUser> userids = project_userMapper.selectList(project_userlqw);
-        Collection c=new ArrayList();
-        userids.addAll(c);
-        userids.forEach(new Consumer<ProjectUser>() {
-            @Override
-            public void accept(ProjectUser projectUser) {
-                userlqw.or().eq(User::getId,projectUser.getUserid());
-            }
-        });
+        Collection<Integer> userids = userMapper.ListUserIdInProjectById(projectid);
+        userlqw.in(User::getId,userids);
         List<User> users = userMapper.selectList(userlqw);
-//        System.out.println(users);
         return users;
     }
 
@@ -179,7 +161,6 @@ public class UserServiceImp implements UserService {
      **/
     @Override
     public Collection<User> ListUserByOrgnizationId(int projectid) {
-//        return userMapper.ListUserByOrgnizationId(id);
         Collection<Integer> userids = userMapper.ListUserIdInOrgnizationById(projectid);
         LambdaQueryWrapper<User> lqw = new LambdaQueryWrapper<User>();
         lqw.in(User::getId,userids);

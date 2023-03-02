@@ -16,10 +16,7 @@ public class MyUserDetailServiceImpl implements MyUserDetailService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        LambdaQueryWrapper<User> lqw = new LambdaQueryWrapper<User>();
-        lqw.eq(User::getUsername,username);
-        User user = userMapper.selectOne(lqw);
-        return user;
+        return userMapper.GetUserByUsername(username);
     }
 
 
