@@ -16,16 +16,16 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 
 import org.springframework.security.web.authentication.RememberMeServices;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.web.authentication.rememberme.InMemoryTokenRepositoryImpl;
 import org.springframework.security.web.authentication.rememberme.JdbcTokenRepositoryImpl;
 import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
 import org.springframework.security.web.session.HttpSessionEventPublisher;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 @Configuration
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
@@ -83,6 +83,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                     resp.getWriter().println("请认证之后再去处理！");
                 })
                 .and()
+                .cors()//跨域处理方案
+                .configurationSource(corsConfiguration())//跨域未测试
+                .and()
                 .csrf().disable()
                 .sessionManagement()//开启会话管理
                 .maximumSessions(1)//单点登录未测试
@@ -101,6 +104,19 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 ;//
 
         http.addFilterAt(loginFilter(), UsernamePasswordAuthenticationFilter.class);
+    }
+    //springsecurity跨域处理方案
+    @Bean
+    public CorsConfigurationSource corsConfiguration(){
+        CorsConfiguration corsConfiguration = new CorsConfiguration();
+        corsConfiguration.setAllowedHeaders(Arrays.asList("*"));
+        corsConfiguration.setAllowedMethods(Arrays.asList("*"));
+        corsConfiguration.setAllowedOrigins(Arrays.asList("*"));
+        corsConfiguration.setMaxAge(3600L);
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**",corsConfiguration);
+        return source;
+
     }
     //监听会话
     @Bean
