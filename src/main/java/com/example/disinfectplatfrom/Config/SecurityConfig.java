@@ -2,6 +2,7 @@ package com.example.disinfectplatfrom.Config;
 
 import com.example.disinfectplatfrom.Filter.LoginFilter;
 import com.example.disinfectplatfrom.Service.MyUserDetailService;
+import com.example.disinfectplatfrom.Service.ServiceImpl.MyPersistentTokenBasedRemeberMeServiceImpl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -12,22 +13,30 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import org.springframework.security.web.authentication.RememberMeServices;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.rememberme.InMemoryTokenRepositoryImpl;
+import org.springframework.security.web.authentication.rememberme.JdbcTokenRepositoryImpl;
+import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
+import org.springframework.security.web.session.HttpSessionEventPublisher;
+
+import javax.servlet.http.HttpServletResponse;
+import javax.sql.DataSource;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 @Configuration
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
+    private final DataSource dataSource;
+
     private final MyUserDetailService myUserDetailService;
+
     @Autowired
-    public SecurityConfig(MyUserDetailService myUserDetailService) {
+    public SecurityConfig(MyUserDetailService myUserDetailService,DataSource dataSource) {
+        this.dataSource=dataSource;
         this.myUserDetailService = myUserDetailService;
     }
 
@@ -63,7 +72,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                     resp.getWriter().println(s);
                 })
                 .and()
-                .rememberMe()//开启记住我功能
+                .rememberMe() //开启记住我功能
+                .rememberMeServices(rememberMeServices())//设置自动登录使用哪个 rememberMeServices
+//                .tokenRepository(persistentTokenRepository())
                 .and()
                 .exceptionHandling()
                 .authenticationEntryPoint((req,resp,ex)->{
@@ -72,21 +83,48 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                     resp.getWriter().println("请认证之后再去处理！");
                 })
                 .and()
-                .csrf().disable();
+                .csrf().disable()
+                .sessionManagement()//开启会话管理
+                .maximumSessions(1)//单点登录未测试
+                .maxSessionsPreventsLogin(true)
+                .expiredSessionStrategy((event -> {
+                    HttpServletResponse response = event.getResponse();
+                    Map<String, Object> res = new HashMap<>();
+                    res.put("status",500);
+                    res.put("msg","当前会话已经失效,请重新登录！");
+                    String s = new ObjectMapper().writeValueAsString(res);
+                    response.setContentType("application/json;charset=UTF-8");
+                    response.getWriter().println(s);
+                    response.flushBuffer();
+                }))
+//                .maxSessionsPreventsLogin(true)一旦登录，禁止再次登录
+                ;//
 
         http.addFilterAt(loginFilter(), UsernamePasswordAuthenticationFilter.class);
     }
-
+    //监听会话
+    @Bean
+    public HttpSessionEventPublisher httpSessionEventPublisher(){
+        return new HttpSessionEventPublisher();
+    }
+    //指定数据库持久化
+    @Bean
+    public PersistentTokenRepository persistentTokenRepository(){
+        JdbcTokenRepositoryImpl jdbcTokenRepository = new JdbcTokenRepositoryImpl();
+        jdbcTokenRepository.setCreateTableOnStartup(false);//只需要没有表时设置为 true
+        jdbcTokenRepository.setDataSource(dataSource);
+        return jdbcTokenRepository;
+    }
+    @Bean
+    public RememberMeServices rememberMeServices(){
+        return new MyPersistentTokenBasedRemeberMeServiceImpl(UUID.randomUUID().toString(),userDetailsService(), persistentTokenRepository());
+    }
     @Bean
     @Override
     public AuthenticationManager authenticationManagerBean() throws Exception {
         return super.authenticationManagerBean();
     }
-//    @Bean
-//    @Override
-//    protected AuthenticationManager authenticationManager() throws Exception {
-//        return super.authenticationManager();
-//    }
+
     //自定义filter交给工厂管理
     @Bean
     public LoginFilter loginFilter() throws Exception {
@@ -95,6 +133,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         loginFilter.setUsernameParameter("username");//指定接收json用户名key
         loginFilter.setPasswordParameter("password");//指定接收json密码key
         loginFilter.setAuthenticationManager(authenticationManagerBean());
+        loginFilter.setRememberMeServices(rememberMeServices());//设置认证成功时使用自定义rememberMeServices
 
         loginFilter.setAuthenticationSuccessHandler((req,resp,authentication)->{
             Map<String,Object> result=new HashMap<String,Object>();

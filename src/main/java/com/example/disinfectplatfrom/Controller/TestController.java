@@ -21,9 +21,6 @@ public class TestController {
     @RequestMapping("test")
     public String test()
     {
-
-        Collection<User> users = userService.ListUserByProjectAdminId();
-        System.out.println(users);
         return "test";
     }
 
