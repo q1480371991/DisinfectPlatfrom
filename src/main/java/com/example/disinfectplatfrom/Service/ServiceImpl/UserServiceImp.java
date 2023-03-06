@@ -167,6 +167,43 @@ public class UserServiceImp implements UserService {
         List<User> users = userMapper.selectList(lqw);
         return users;
     }
+    /*
+     * @title :AddProjectAdmin
+     * @Author :Lin
+     * @Description : 添加组织管理员，仅限海威账号
+     * @Date :22:56 2023/3/6
+     * @Param :[user]
+     * @return :void
+     **/
+    @Override
+    public void AddProjectAdmin(User user) {
+        userMapper.insert(user);
+    }
+    /*
+     * @title :AddOrginationUser
+     * @Author :Lin
+     * @Description : 添加组织用户，仅限项目管理员
+     * @Date :23:05 2023/3/6
+     * @Param :[user]
+     * @return :void
+     **/
+    @Override
+    public void AddOrginationUser(User user) {
+
+    }
+
+    /*
+     * @title :AddSmallRoutineUser
+     * @Author :Lin
+     * @Description : 小程序用户注册
+     * @Date :22:57 2023/3/6
+     * @Param :[user]
+     * @return :void
+     **/
+    @Override
+    public void AddSmallRoutineUser(User user) {
+        userMapper.insert(user);
+    }
 
 
 }

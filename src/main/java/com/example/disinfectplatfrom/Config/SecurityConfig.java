@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 
@@ -28,6 +29,7 @@ import javax.sql.DataSource;
 import java.util.*;
 
 @Configuration
+@EnableGlobalMethodSecurity(prePostEnabled = true)
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final DataSource dataSource;
@@ -62,7 +64,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .and().formLogin()
                 .and()
                 .logout().logoutUrl("/logout")
-                .logoutSuccessHandler((res,resp,authentication)->{
+                  .logoutSuccessHandler((res,resp,authentication)->{
                     Map<String,Object> result=new HashMap<String,Object>();
                     result.put("msg","注销成功");
                     result.put("用户信息",authentication.getPrincipal());

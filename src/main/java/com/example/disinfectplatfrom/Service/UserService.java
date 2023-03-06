@@ -2,7 +2,6 @@ package com.example.disinfectplatfrom.Service;
 
 import com.example.disinfectplatfrom.Pojo.Project;
 import com.example.disinfectplatfrom.Pojo.User;
-import org.apache.ibatis.annotations.Update;
 
 import java.util.Collection;
 
@@ -28,4 +27,13 @@ public interface UserService {
 
     //返回组织下的用户账号
     public Collection<User> ListUserByOrgnizationId(int id);
+
+    //添加组织管理员，仅限海威账号
+    public void AddProjectAdmin(User user);
+
+    //小程序用户注册
+    public void AddSmallRoutineUser(User user);
+
+    //添加组织用户，仅限项目管理员
+    public void AddOrginationUser(User user);
 }
