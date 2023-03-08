@@ -1,6 +1,7 @@
 package com.example.disinfectplatfrom.Pojo;
 
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.SqlCondition;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import lombok.Data;
@@ -15,6 +16,8 @@ import java.util.List;
 public class User implements UserDetails {
     @TableId(value = "id", type = IdType.AUTO)
     private Integer id;
+    @TableField(condition = SqlCondition.LIKE)
+    private String name;
     private String username;
     @TableField(select = false)
     private String password;

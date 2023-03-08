@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ObjectUtils;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -179,6 +180,30 @@ public class UserServiceImp implements UserService {
     public void AddProjectAdmin(User user) {
         userMapper.insert(user);
     }
+
+    /*
+     * @title :SelectUser
+     * @Author :Lin
+     * @Description : 模糊查询用户
+     * @Date :16:55 2023/3/7
+     * @Param :[s, projectid]
+     * @return :void
+     **/
+    @Override
+    public Collection<User> SelectUser(String s, Integer projectid,Integer status,String email,String phonenumber) {
+        LambdaQueryWrapper<User> lqw = new LambdaQueryWrapper<User>();
+        if(!ObjectUtils.isEmpty(status))lqw.eq(User::getStatus,status);
+        if(!ObjectUtils.isEmpty(email))lqw.eq(User::getEmail,email);
+        if(!ObjectUtils.isEmpty(phonenumber))lqw.eq(User::getPhonenumber,phonenumber);
+        if(!ObjectUtils.isEmpty(projectid)){
+            Collection<Integer> userid = userMapper.ListUserIdInProjectById(projectid);
+            lqw.in(User::getId,userid);
+        }
+        if(!ObjectUtils.isEmpty(s))lqw.like(User::getName,s);
+        List<User> users = userMapper.selectList(lqw);
+        return users;
+    }
+
     /*
      * @title :AddOrginationUser
      * @Author :Lin
@@ -205,5 +230,21 @@ public class UserServiceImp implements UserService {
         userMapper.insert(user);
     }
 
+    /*
+     * @title :CheckProjectName
+     * @Author :Lin
+     * @Description : 检测用户账户名是否重复
+     * @Date :21:34 2023/3/7
+     * @Param :[projectname]
+     * @return :boolean
+     **/
+    @Override
+    public boolean CheckUserName(String username) {
+        LambdaQueryWrapper<User> lqw = new LambdaQueryWrapper<User>();
+        lqw.eq(User::getUsername,username);
+        User user = userMapper.selectOne(lqw);
+        if(!ObjectUtils.isEmpty(user))return false;
+        else return true;
+    }
 
 }

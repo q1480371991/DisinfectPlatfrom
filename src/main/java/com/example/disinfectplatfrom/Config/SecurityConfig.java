@@ -60,6 +60,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http.authorizeHttpRequests()
                 .mvcMatchers("/vc.jpg").permitAll()
+                .mvcMatchers("/test").permitAll()
+                .mvcMatchers("/test1").permitAll()
                 .anyRequest().authenticated()//所有请求必须认证
                 .and().formLogin()
                 .and()

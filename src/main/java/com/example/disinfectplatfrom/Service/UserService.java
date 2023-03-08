@@ -36,4 +36,10 @@ public interface UserService {
 
     //添加组织用户，仅限项目管理员
     public void AddOrginationUser(User user);
+
+    //查询用户
+    public Collection<User> SelectUser(String s, Integer projectid,Integer status,String email,String phonenumber);
+
+    //检测用户账户名是否重复
+    public boolean CheckUserName(String username);
 }

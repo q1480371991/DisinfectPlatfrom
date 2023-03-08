@@ -17,6 +17,7 @@ import lombok.Data;
 public class Project {
     @TableId(value = "id", type = IdType.AUTO)
     private Integer id;
+    private Integer projectid;
     private String projectname;
     private int adminid;
     private String creattime;
@@ -25,5 +26,5 @@ public class Project {
     private String originaccount;
     private int c_account;
     private int max_account;
-    private int delflag;
+    private int del_flag;
 }
