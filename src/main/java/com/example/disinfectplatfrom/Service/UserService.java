@@ -13,7 +13,7 @@ public interface UserService {
     public void UpdatePassword(String password);//通过id修改用户密码
 
     //返回项目下所有账户内容
-    public Collection<User> ListUserByProjectId(int projectid);
+    public Collection<User> ListUserByProjectId(Integer projectid,Integer flag);
 
     //返回项目管理员下所有账户内容
     public Collection<User> ListUserByProjectAdminId();

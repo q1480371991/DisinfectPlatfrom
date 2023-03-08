@@ -74,12 +74,19 @@ public class UserServiceImp implements UserService {
      * @Author :Lin
      * @Description : 获取项目下所有账号信息
      * @Date :22:40 2023/3/1
-     * @Param :[projectid]
+     * @Param :[projectid] [flag]:0查询的List包括项目管理员和初始账号，1不包括
      * @return :java.util.Collection<com.example.disinfectplatfrom.Pojo.User>
      **/
-    public Collection<User> ListUserByProjectId(int projectid) {
+    public Collection<User> ListUserByProjectId(Integer projectid,Integer flag) {
         LambdaQueryWrapper<User> userlqw = new LambdaQueryWrapper<User>();
         Collection<Integer> userids = userMapper.ListUserIdInProjectById(projectid);
+        if (flag==1){
+            Project project = projectMapper.selectById(projectid);
+            Collection<Integer> arr = new ArrayList<>();
+            arr.add(project.getAdminid());
+            arr.add(project.getOriginaccountid());
+            userids.removeAll(arr);
+        }
         userlqw.in(User::getId,userids);
         List<User> users = userMapper.selectList(userlqw);
         return users;
@@ -102,7 +109,7 @@ public class UserServiceImp implements UserService {
         lqw.select(Project::getId).eq(Project::getAdminid,currentUser.getId());
         Collection<Project> projects = projectMapper.selectList(lqw);
         for (Project project : projects) {
-            Collection<User> users = ListUserByProjectId(project.getId());
+            Collection<User> users = ListUserByProjectId(project.getId(),0);
             res.addAll(users);
         }
         return res;
@@ -118,7 +125,9 @@ public class UserServiceImp implements UserService {
      **/
     @Override
     public Collection<Project> ListAllProject() {
-        List<Project> projects = projectMapper.selectList(new LambdaQueryWrapper<Project>());
+        LambdaQueryWrapper<Project> lqw = new LambdaQueryWrapper<>();
+        lqw.eq(Project::getDel_flag,0);//查没有被逻辑删除的项目
+        List<Project> projects = projectMapper.selectList(lqw);
 //        System.out.println(projects);
         return projects;
     }
