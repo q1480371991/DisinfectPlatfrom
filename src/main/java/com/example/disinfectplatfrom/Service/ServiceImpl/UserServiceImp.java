@@ -18,6 +18,17 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+/**
+ * @author : Lin
+ * @version : [v1.0]
+ * @className : UserServiceImp
+ * @description : UserService
+ * @createTime : 2023/3/1 22:53
+ * @updateUser : Lin
+ * @updateTime : 2023/3/1 22:53
+ * @updateRemark : 描述说明本次修改内容
+ */
+@SuppressWarnings({"ALL", "AlibabaClassMustHaveAuthor"})
 @Service
 public class UserServiceImp implements UserService {
     @Autowired
@@ -39,11 +50,12 @@ public class UserServiceImp implements UserService {
     public Collection<User> ListAllUser()
     {
         QueryWrapper<User> queryWrapper = new QueryWrapper<User>();
-        queryWrapper.select(User.class, info ->!info.getColumn().equals("password"));//查询指定某字段以外的数据
-
+        //查询指定某字段以外的数据
+        queryWrapper.select(User.class, info ->!info.getColumn().equals("password"));
         List<User> Users=userMapper.selectList(queryWrapper);
 
-        Users.set(0, null);//不包括海威账号
+        //不包括海威账号
+        Users.set(0, null);
         return Users;
     }
 
@@ -60,7 +72,6 @@ public class UserServiceImp implements UserService {
         //获取当前用户信息
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User currentUser = (User)authentication.getPrincipal();
-//        System.out.println(currentUser);
         LambdaQueryWrapper<User> lqw = new LambdaQueryWrapper<User>();
         //直接修改当前用户的密码，不需要前端传用户id
         User user = userMapper.selectById(currentUser.getId());
@@ -77,7 +88,9 @@ public class UserServiceImp implements UserService {
      * @Param :[projectid] [flag]:0查询的List包括项目管理员和初始账号，1不包括
      * @return :java.util.Collection<com.example.disinfectplatfrom.Pojo.User>
      **/
-    public Collection<User> ListUserByProjectId(Integer projectid,Integer flag) {
+    @Override
+    public Collection<User> ListUserByProjectId(Integer projectid, Integer flag) {
+        List<User> users;
         LambdaQueryWrapper<User> userlqw = new LambdaQueryWrapper<User>();
         Collection<Integer> userids = userMapper.ListUserIdInProjectById(projectid);
         if (flag==1){
@@ -87,8 +100,15 @@ public class UserServiceImp implements UserService {
             arr.add(project.getOriginaccountid());
             userids.removeAll(arr);
         }
-        userlqw.in(User::getId,userids);
-        List<User> users = userMapper.selectList(userlqw);
+        if(!userids.isEmpty())
+        {
+            userlqw.in(User::getId,userids);
+            users = userMapper.selectList(userlqw);
+        }
+        else {
+            users=null;
+        }
+
         return users;
     }
 
@@ -126,9 +146,9 @@ public class UserServiceImp implements UserService {
     @Override
     public Collection<Project> ListAllProject() {
         LambdaQueryWrapper<Project> lqw = new LambdaQueryWrapper<>();
-        lqw.eq(Project::getDel_flag,0);//查没有被逻辑删除的项目
+        //查没有被逻辑删除的项目
+        lqw.eq(Project::getDel_flag,0);
         List<Project> projects = projectMapper.selectList(lqw);
-//        System.out.println(projects);
         return projects;
     }
 
@@ -201,14 +221,21 @@ public class UserServiceImp implements UserService {
     @Override
     public Collection<User> SelectUser(String s, Integer projectid,Integer status,String email,String phonenumber) {
         LambdaQueryWrapper<User> lqw = new LambdaQueryWrapper<User>();
-        if(!ObjectUtils.isEmpty(status))lqw.eq(User::getStatus,status);
-        if(!ObjectUtils.isEmpty(email))lqw.eq(User::getEmail,email);
-        if(!ObjectUtils.isEmpty(phonenumber))lqw.eq(User::getPhonenumber,phonenumber);
+        if(!ObjectUtils.isEmpty(status)){
+            lqw.eq(User::getStatus,status);}
+        if(!ObjectUtils.isEmpty(email)) {
+            lqw.eq(User::getEmail, email);
+        }
+        if(!ObjectUtils.isEmpty(phonenumber)) {
+            lqw.eq(User::getPhonenumber, phonenumber);
+        }
         if(!ObjectUtils.isEmpty(projectid)){
             Collection<Integer> userid = userMapper.ListUserIdInProjectById(projectid);
             lqw.in(User::getId,userid);
         }
-        if(!ObjectUtils.isEmpty(s))lqw.like(User::getName,s);
+        if(!ObjectUtils.isEmpty(s)) {
+            lqw.like(User::getName, s);
+        }
         List<User> users = userMapper.selectList(lqw);
         return users;
     }
@@ -251,9 +278,19 @@ public class UserServiceImp implements UserService {
     public boolean CheckUserName(String username) {
         LambdaQueryWrapper<User> lqw = new LambdaQueryWrapper<User>();
         lqw.eq(User::getUsername,username);
+        lqw.eq(User::getDel_flag,0);
         User user = userMapper.selectOne(lqw);
-        if(!ObjectUtils.isEmpty(user))return false;
-        else return true;
+        if(!ObjectUtils.isEmpty(user)){
+            return false;
+        }
+        else {
+            return true;
+        }
+    }
+
+    @Override
+    public void AddRole() {
+
     }
 
 }

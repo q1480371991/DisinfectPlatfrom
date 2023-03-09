@@ -29,9 +29,10 @@ public class ProjectServiceImp implements ProjectService {
      * @return :void
      **/
     @Override
-    public void DeleteProjectById(Integer projectid) {
+    public void DeleteProjectById(Integer projectid,String password) {
         Collection<User> users = userService.ListUserByProjectId(projectid,1);
-        if (ObjectUtils.isEmpty(users)){
+        //当一个项目没有除项目管理员和项目创始人账号时才能删除
+        if (ObjectUtils.isEmpty(users)&&password.equalsIgnoreCase(password)){
             Project project = projectMapper.selectById(projectid);
             project.setDel_flag(1);
             projectMapper.updateById(project);

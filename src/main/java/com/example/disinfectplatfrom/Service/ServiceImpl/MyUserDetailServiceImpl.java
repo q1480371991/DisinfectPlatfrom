@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ObjectUtils;
 
 @Service
 public class MyUserDetailServiceImpl implements MyUserDetailService {
@@ -16,7 +17,15 @@ public class MyUserDetailServiceImpl implements MyUserDetailService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return userMapper.GetUserByUsername(username);
+        //查询用户的基本信息
+        User user = userMapper.GetUserByUsername(username);
+        if(!ObjectUtils.isEmpty(user)){
+            throw new UsernameNotFoundException("当前用户不存在");
+        }
+        //查询用户的roles字符串
+
+        //查询用户的authority字符串
+        return user;
     }
 
 

@@ -42,4 +42,7 @@ public interface UserService {
 
     //检测用户账户名是否重复
     public boolean CheckUserName(String username);
+
+    //新增角色
+    public void AddRole();
 }

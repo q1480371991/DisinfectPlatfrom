@@ -24,7 +24,5 @@ public class Project {
     private String updatetime;
     private String remark;
     private int originaccountid;
-    private int c_account;
-    private int max_account;
     private int del_flag;
 }

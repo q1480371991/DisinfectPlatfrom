@@ -12,12 +12,13 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.util.ObjectUtils;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-//@SpringBootTest
+@SpringBootTest
 public class tset {
     @Autowired
     MyUserDetailServiceImpl myUserDetailService;
@@ -29,15 +30,15 @@ public class tset {
     ProjectMapper projectMapper;
     @Test
     public void test1(){
-        Collection<Integer> s1 = new ArrayList<>();
-        Collection<Integer> s2 = new ArrayList<>();
-        for(int i=0;i<10;i++)
-        {
-            if(i>5)s2.add(i);
-            s1.add(i);
-        }
-        s1.removeAll(s2);
-
-        System.out.println(s1);
+        ArrayList<Integer> q1 = new ArrayList<>();
+        ArrayList<Integer> q2 = new ArrayList<>();
+        q1.add(1);
+        q1.add(2);
+        q1.add(3);
+        q2.add(2);
+        q2.add(0);
+        System.out.println(q1);
+        q1.removeAll(q2);
+        System.out.println(q1);
     }
 }
