@@ -3,6 +3,7 @@ package com.example.disinfectplatfrom.Service.ServiceImpl;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.rememberme.PersistentTokenBasedRememberMeServices;
 import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
+import org.springframework.util.ObjectUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import java.awt.*;
@@ -33,13 +34,17 @@ public class MyPersistentTokenBasedRemeberMeServiceImpl extends PersistentTokenB
      **/
     @Override
     protected boolean rememberMeRequested(HttpServletRequest request, String parameter) {
-        String paramValue = request.getAttribute(parameter).toString();
-        if (paramValue != null) {
-            if (paramValue.equalsIgnoreCase("true") || paramValue.equalsIgnoreCase("on")
-                    || paramValue.equalsIgnoreCase("yes") || paramValue.equals("1")) {
-                return true;
+        Object attribute = request.getAttribute(parameter);
+        if(!ObjectUtils.isEmpty(attribute)){
+            String paramValue = attribute.toString();
+            if (!ObjectUtils.isEmpty(paramValue)) {
+                if (paramValue.equalsIgnoreCase("true") || paramValue.equalsIgnoreCase("on")
+                        || paramValue.equalsIgnoreCase("yes") || paramValue.equals("1")) {
+                    return true;
+                }
             }
         }
+
         return false;
     }
 }

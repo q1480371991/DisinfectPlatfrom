@@ -36,6 +36,9 @@ public class TestController {
 
     @RequestMapping(value = "test1")
     public boolean test1(@RequestBody Map<String,Object> info) throws IOException {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User currentUser = (User)authentication.getPrincipal();
+        System.out.println(currentUser.getAuthorities());
         return true;
     }
 

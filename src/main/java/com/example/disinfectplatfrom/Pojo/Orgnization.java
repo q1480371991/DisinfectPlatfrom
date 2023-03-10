@@ -9,8 +9,8 @@ public class Orgnization {
     @TableId(value = "id", type = IdType.AUTO)
     private Integer id;
     private String name;
-    private int projectid;
-    private String adminaccount;
+    private int projectId;
+    private String adminAccount;
     private String locate;
     private String remark;
     private String characteristic;

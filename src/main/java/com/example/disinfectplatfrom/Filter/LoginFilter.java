@@ -52,7 +52,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
                 }
                 System.out.println("用户名: " + username + " 密码: " + password+" 验证码："+kaptcha+" remember-me："+remembermeValue);
                 //获取session中的验证码
-                String sessionVerifyCode =(String) request.getSession().getAttribute("kaptcha");
+                String sessionVerifyCode =(String) request.getSession().getAttribute(getKaptchaParameter());
                 if(!ObjectUtils.isEmpty(kaptcha)&&!ObjectUtils.isEmpty(sessionVerifyCode)&&kaptcha.equalsIgnoreCase(sessionVerifyCode))
                 {
                     //验证码通过，认证

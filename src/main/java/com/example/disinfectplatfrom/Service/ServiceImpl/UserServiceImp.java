@@ -9,6 +9,7 @@ import com.example.disinfectplatfrom.Pojo.Project;
 import com.example.disinfectplatfrom.Pojo.User;
 import com.example.disinfectplatfrom.Service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -120,6 +121,7 @@ public class UserServiceImp implements UserService {
      * @Param :[]
      * @return :java.util.Collection<com.example.disinfectplatfrom.Pojo.User>
      **/
+    @PreAuthorize("hasRole()")
     @Override
     public Collection<User> ListUserByProjectAdminId() {
         Collection<User> res=new ArrayList<User>();

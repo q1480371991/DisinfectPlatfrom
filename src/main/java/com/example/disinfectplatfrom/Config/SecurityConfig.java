@@ -1,6 +1,7 @@
 package com.example.disinfectplatfrom.Config;
 
 import com.example.disinfectplatfrom.Filter.LoginFilter;
+import com.example.disinfectplatfrom.Pojo.User;
 import com.example.disinfectplatfrom.Service.MyUserDetailService;
 import com.example.disinfectplatfrom.Service.ServiceImpl.MyPersistentTokenBasedRemeberMeServiceImpl;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -158,7 +159,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         loginFilter.setAuthenticationSuccessHandler((req,resp,authentication)->{
             Map<String,Object> result=new HashMap<String,Object>();
             result.put("msg","登录成功");
-            result.put("用户信息",authentication.getPrincipal());
+            User user =(User) authentication.getPrincipal();
+            //避免暴露密码
+            user.setPassword(null);
+            result.put("用户信息",user);
             resp.setStatus(HttpStatus.OK.value());
             resp.setContentType("application/json;charset=UTF-8");
             String s = new ObjectMapper().writeValueAsString(result);

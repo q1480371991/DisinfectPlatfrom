@@ -35,14 +35,14 @@ public class User implements UserDetails {
     private String email;
     private String phonenumber;
     private int sex;
-    private String createtime;
-    private String updatetime;
-    private int del_flag;
+    private String createTime;
+    private String updateTime;
+    private int delFlag;
     private String remark;
     @TableField(exist = false)
     private Collection<Role> roles;//关系属性 用来存储当前用户所有角色信息
     @TableField(exist = false)
-    private Collection<String> authorities;
+    private Collection<Authority> authorities;
     private int isfirst;
 
     /*
@@ -55,16 +55,21 @@ public class User implements UserDetails {
      **/
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        Collection<GrantedAuthority> authoritylist = new ArrayList<>();
-        for (String authority:this.authorities
-             ) {
-            if(!ObjectUtils.isEmpty(authority)){
-                //没写完
-                SimpleGrantedAuthority simpleGrantedAuthority = new SimpleGrantedAuthority(authority);
-                authoritylist.add(simpleGrantedAuthority);
+        if(!ObjectUtils.isEmpty(this.authorities)){
+            Collection<GrantedAuthority> authoritylist = new ArrayList<>();
+            for (Authority authority:this.authorities
+            ) {
+                if(!ObjectUtils.isEmpty(authority)){
+                    //没写完
+                    SimpleGrantedAuthority simpleGrantedAuthority = new SimpleGrantedAuthority(authority.getAuthorityName());
+                    authoritylist.add(simpleGrantedAuthority);
+                }
             }
+            return authoritylist;
+        }else{
+            return null;
         }
-        return authoritylist;
+
     }
 
     @Override
