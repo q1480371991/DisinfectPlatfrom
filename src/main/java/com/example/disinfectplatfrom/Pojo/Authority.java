@@ -21,6 +21,7 @@ public class Authority {
     @TableId(value = "id", type = IdType.AUTO)
     private Integer id;
     private String authorityName;
+    private String name;
     private Integer status;
     private String updateTime;
     private Integer delFlag;

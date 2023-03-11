@@ -34,7 +34,7 @@ public class ProjectServiceImp implements ProjectService {
         //当一个项目没有除项目管理员和项目创始人账号时才能删除
         if (ObjectUtils.isEmpty(users)&&password.equalsIgnoreCase(password)){
             Project project = projectMapper.selectById(projectid);
-            project.setDel_flag(1);
+            project.setDelFlag(1);
             projectMapper.updateById(project);
         }
     }
@@ -50,11 +50,15 @@ public class ProjectServiceImp implements ProjectService {
     @Override
     public boolean CheckProjectId(Integer projectid) {
         LambdaQueryWrapper<Project> lqw = new LambdaQueryWrapper<Project>();
-        lqw.eq(Project::getDel_flag,0);//查没有被逻辑删除的项目
-        lqw.eq(Project::getProjectid,projectid);
+        lqw.eq(Project::getDelFlag,0);//查没有被逻辑删除的项目
+        lqw.eq(Project::getProjectId,projectid);
         Project project = projectMapper.selectOne(lqw);
-        if(!ObjectUtils.isEmpty(project))return true;
-        else return false;
+        if(!ObjectUtils.isEmpty(project)) {
+            return true;
+        }
+        else {
+            return false;
+        }
     }
     /*
      * @title :CheckProjectId
@@ -67,10 +71,14 @@ public class ProjectServiceImp implements ProjectService {
     @Override
     public boolean CheckProjectName(String projectname) {
         LambdaQueryWrapper<Project> lqw = new LambdaQueryWrapper<Project>();
-        lqw.eq(Project::getDel_flag,0);//查没有被逻辑删除的项目
-        lqw.eq(Project::getProjectname,projectname);
+        lqw.eq(Project::getDelFlag,0);//查没有被逻辑删除的项目
+        lqw.eq(Project::getProjectName,projectname);
         Project project = projectMapper.selectOne(lqw);
-        if(!ObjectUtils.isEmpty(project))return true;
-        else return false;
+        if(!ObjectUtils.isEmpty(project)) {
+            return true;
+        }
+        else {
+            return false;
+        }
     }
 }

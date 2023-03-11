@@ -1,9 +1,11 @@
 package com.example.disinfectplatfrom.Service;
 
 import com.example.disinfectplatfrom.Pojo.Project;
+import com.example.disinfectplatfrom.Pojo.Role;
 import com.example.disinfectplatfrom.Pojo.User;
 
 import java.util.Collection;
+import java.util.List;
 
 public interface UserService {
 
@@ -44,5 +46,5 @@ public interface UserService {
     public boolean CheckUserName(String username);
 
     //新增角色
-    public void AddRole();
+    public void AddRole(Role role, Integer projectid, List<Integer> authorities,Integer quantity,List<Integer> orgnizations);
 }

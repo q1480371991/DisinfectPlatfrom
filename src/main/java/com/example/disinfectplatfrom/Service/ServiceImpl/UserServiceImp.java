@@ -2,14 +2,12 @@ package com.example.disinfectplatfrom.Service.ServiceImpl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.example.disinfectplatfrom.Mapper.OrgnizationMapper;
-import com.example.disinfectplatfrom.Mapper.ProjectMapper;
-import com.example.disinfectplatfrom.Mapper.UserMapper;
+import com.example.disinfectplatfrom.Mapper.*;
 import com.example.disinfectplatfrom.Pojo.Project;
+import com.example.disinfectplatfrom.Pojo.Role;
 import com.example.disinfectplatfrom.Pojo.User;
 import com.example.disinfectplatfrom.Service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -38,6 +36,10 @@ public class UserServiceImp implements UserService {
     private ProjectMapper projectMapper;
     @Autowired
     private OrgnizationMapper orgnizationMapper;
+    @Autowired
+    private RoleMapper roleMapper;
+    @Autowired
+    private AuthorityMapper authorityMapper;
 
     /*
      * @title :ListAllUser
@@ -97,8 +99,8 @@ public class UserServiceImp implements UserService {
         if (flag==1){
             Project project = projectMapper.selectById(projectid);
             Collection<Integer> arr = new ArrayList<>();
-            arr.add(project.getAdminid());
-            arr.add(project.getOriginaccountid());
+            arr.add(project.getAdminId());
+            arr.add(project.getOriginAccountId());
             userids.removeAll(arr);
         }
         if(!userids.isEmpty())
@@ -121,14 +123,13 @@ public class UserServiceImp implements UserService {
      * @Param :[]
      * @return :java.util.Collection<com.example.disinfectplatfrom.Pojo.User>
      **/
-    @PreAuthorize("hasRole()")
     @Override
     public Collection<User> ListUserByProjectAdminId() {
         Collection<User> res=new ArrayList<User>();
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User currentUser = (User)authentication.getPrincipal();
         LambdaQueryWrapper<Project> lqw = new LambdaQueryWrapper<Project>();
-        lqw.select(Project::getId).eq(Project::getAdminid,currentUser.getId());
+        lqw.select(Project::getId).eq(Project::getAdminId,currentUser.getId());
         Collection<Project> projects = projectMapper.selectList(lqw);
         for (Project project : projects) {
             Collection<User> users = ListUserByProjectId(project.getId(),0);
@@ -149,7 +150,7 @@ public class UserServiceImp implements UserService {
     public Collection<Project> ListAllProject() {
         LambdaQueryWrapper<Project> lqw = new LambdaQueryWrapper<>();
         //查没有被逻辑删除的项目
-        lqw.eq(Project::getDel_flag,0);
+        lqw.eq(Project::getDelFlag,0);
         List<Project> projects = projectMapper.selectList(lqw);
         return projects;
     }
@@ -178,7 +179,7 @@ public class UserServiceImp implements UserService {
     @Override
     public void UpdateProjectById(int id, String projectname, String remark) {
         Project project = projectMapper.selectById(id);
-        project.setProjectname(projectname);
+        project.setProjectName(projectname);
         project.setRemark(remark);
         projectMapper.updateById(project);
     }
@@ -280,7 +281,7 @@ public class UserServiceImp implements UserService {
     public boolean CheckUserName(String username) {
         LambdaQueryWrapper<User> lqw = new LambdaQueryWrapper<User>();
         lqw.eq(User::getUsername,username);
-        lqw.eq(User::getDel_flag,0);
+        lqw.eq(User::getDelFlag,0);
         User user = userMapper.selectOne(lqw);
         if(!ObjectUtils.isEmpty(user)){
             return false;
@@ -290,9 +291,27 @@ public class UserServiceImp implements UserService {
         }
     }
 
+    /*
+     * @title :AddRole
+     * @Author :Lin
+     * @Description : 增加角色，并维护角色与项目、组织、权限的关系
+     * @Date :14:10 2023/3/11
+     * @Param :[role, projectid, authorities, quantity, orgnizationids]
+     * @return :void
+     **/
     @Override
-    public void AddRole() {
-
+    public void AddRole(Role role, Integer projectid, List<Integer> authorities,Integer quantity,List<Integer> orgnizationids) {
+        roleMapper.insert(role);
+        //该项目下有什么角色
+        projectMapper.AddProject_Roles(projectid,role.getId(),quantity);
+        //该角色对某些组织有数据权限
+        for (Integer orgnizationid : orgnizationids) {
+            roleMapper.AddRole_Orgnization(role.getId(),orgnizationid);
+        }
+        //该角色有什么权限
+        for (Integer authority : authorities) {
+            authorityMapper.AddRole_Menu(role.getId(),authority);
+        }
     }
 
 }
