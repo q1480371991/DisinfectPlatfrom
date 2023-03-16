@@ -128,6 +128,8 @@ public class UserServiceImp implements UserService {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User currentUser = (User)authentication.getPrincipal();
         LambdaQueryWrapper<Project> lqw = new LambdaQueryWrapper<Project>();
+        //查没有被逻辑删除的项目
+        lqw.eq(Project::getDelFlag,0);
         lqw.select(Project::getId).eq(Project::getAdminId,currentUser.getId());
         Collection<Project> projects = projectMapper.selectList(lqw);
         for (Project project : projects) {
@@ -150,20 +152,38 @@ public class UserServiceImp implements UserService {
         LambdaQueryWrapper<Project> lqw = new LambdaQueryWrapper<>();
         //查没有被逻辑删除的项目
         lqw.eq(Project::getDelFlag,0);
-        List<Project> projects = projectMapper.selectList(lqw);
+        Collection<Project> projects = projectMapper.selectList(lqw);
         return projects;
     }
 
     /*
+     * @title :ListProjectsByAdminid
+     * @Author :Lin
+     * @Description : 返回项目管理员下的项目信息
+     * @Date :21:09 2023/3/16
+     * @Param :[projectid]
+     * @return :java.util.Collection<com.example.disinfectplatfrom.Pojo.Project>
+     **/
+    public Collection<Project> ListProjectsByAdminid(Integer adminid)
+    {
+        LambdaQueryWrapper<Project> lqw = new LambdaQueryWrapper<>();
+        lqw.eq(Project::getAdminId,adminid);
+        //查没有被逻辑删除的项目
+        lqw.eq(Project::getDelFlag,0);
+        Collection<Project> projects = projectMapper.selectList(lqw);
+        return projects ;
+    }
+    /*
      * @title :AddProject
      * @Author :Lin
-     * @Description : 新增项目，仅限海威账号
+     * @Description : 新增项目，仅限海威账号 待改
      * @Date :22:42 2023/3/1
      * @Param :[project]
      * @return :void
      **/
     @Override
-    public void AddProject(Project project) {
+    public void AddProject(Project project,Integer orgnizationid) {
+        orgnizationMapper.AddOrgnization_Project(orgnizationid,project.getId());
         projectMapper.insert(project);
     }
 
@@ -176,8 +196,8 @@ public class UserServiceImp implements UserService {
      * @return :void
      **/
     @Override
-    public void UpdateProjectById(int id, String projectname, String remark) {
-        Project project = projectMapper.selectById(id);
+    public void UpdateProjectById(int projectid, String projectname, String remark) {
+        Project project = projectMapper.selectById(projectid);
         project.setProjectName(projectname);
         project.setRemark(remark);
         projectMapper.updateById(project);
@@ -269,9 +289,6 @@ public class UserServiceImp implements UserService {
             //抛出异常
             throw new RuntimeException("当前角色数量已满");
         }
-
-
-        
     }
 
     /*
@@ -286,6 +303,7 @@ public class UserServiceImp implements UserService {
     public void AddSmallRoutineUser(User user,Integer orgnizationid) {
         userMapper.insert(user);
         orgnizationMapper.AddOrgnization_User(user.getId(),orgnizationid);
+//        projectMapper.AddProject_User();
     }
 
     /*

@@ -3,6 +3,7 @@ package com.example.disinfectplatfrom.Service;
 import com.example.disinfectplatfrom.Pojo.Project;
 import com.example.disinfectplatfrom.Pojo.Role;
 import com.example.disinfectplatfrom.Pojo.User;
+import org.springframework.security.core.parameters.P;
 
 import java.util.Collection;
 import java.util.List;
@@ -10,9 +11,10 @@ import java.util.Map;
 
 public interface UserService {
 
+    //返回所有的账号信息
     public Collection<User> ListAllUser();//海威账号功能
 
-//    @Update("update user set password=#{password} where id=#{id}")
+    //修改密码
     public void UpdatePassword(String password);//通过id修改用户密码
 
     //返回项目下所有账户内容
@@ -21,10 +23,15 @@ public interface UserService {
     //返回项目管理员下所有账户内容
     public Collection<User> ListUserByProjectAdminId();
 
+
     //返回所有项目的信息，仅海威账号
     public Collection<Project> ListAllProject();
+
+    //返回项目管理员下的项目信息
+    public Collection<Project> ListProjectsByAdminid(Integer adminid);
+
     //添加项目，仅海威账号
-    public void AddProject(Project project);
+    public void AddProject(Project project,Integer orgnizationid);
     //编辑项目，仅海威账号
     public void UpdateProjectById(int id,String projectname,String remark);
 
