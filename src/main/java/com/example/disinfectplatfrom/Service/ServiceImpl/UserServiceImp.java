@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.example.disinfectplatfrom.Mapper.*;
 import com.example.disinfectplatfrom.Pojo.Project;
+import com.example.disinfectplatfrom.Pojo.Project_Role;
 import com.example.disinfectplatfrom.Pojo.Role;
 import com.example.disinfectplatfrom.Pojo.User;
 import com.example.disinfectplatfrom.Service.UserService;
@@ -13,9 +14,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author : Lin
@@ -244,16 +243,35 @@ public class UserServiceImp implements UserService {
     }
 
     /*
-     * @title :AddOrginationUser
+     * @title :AddProjectUser
      * @Author :Lin
-     * @Description : 添加组织用户，仅限项目管理员
+     * @Description : 添加项目用户，仅限项目管理员
      * @Date :23:05 2023/3/6
      * @Param :[user]
      * @return :void
      **/
     @Override
-    public void AddOrginationUser(User user) {
+    public void AddProjectUser(User user,Integer projectid,Integer roleid){
+        //先查询该项目下该角色的信息
+        Project_Role project_role = projectMapper.SelectProject_Role(projectid, roleid);
+        //判断
+        if (project_role.getCurrentAccount()<project_role.getMaxAccount()){
+            //当前角色的数量小于最大数量，添加用户
+            userMapper.insert(user);
+            //将用户与项目关联
+            projectMapper.AddProject_User(projectid,user.getId());
+            //用户的角色
+            userMapper.AddUser_Role(user.getId(),roleid);
+            //更新该项目中该角色对应的current_account
+            project_role.setCurrentAccount(project_role.getCurrentAccount()+1);
+            projectMapper.UpdateProjectRoleAccount(project_role.getCurrentAccount(),project_role.getProjectId(),project_role.getRoleId());
+        }else {
+            //抛出异常
+            throw new RuntimeException("当前角色数量已满");
+        }
 
+
+        
     }
 
     /*
@@ -265,8 +283,9 @@ public class UserServiceImp implements UserService {
      * @return :void
      **/
     @Override
-    public void AddSmallRoutineUser(User user) {
+    public void AddSmallRoutineUser(User user,Integer orgnizationid) {
         userMapper.insert(user);
+        orgnizationMapper.AddOrgnization_User(user.getId(),orgnizationid);
     }
 
     /*
@@ -313,5 +332,25 @@ public class UserServiceImp implements UserService {
             authorityMapper.AddRole_Menu(role.getId(),authority);
         }
     }
+    /*
+     * @title :ListRolesByProjectId
+     * @Author :Lin
+     * @Description : 查询项目下有什么角色信息
+     * @Date :11:00 2023/3/16
+     * @Param :[projectid]
+     * @return :void
+     **/
+    @Override
+    public Collection<Role> ListRolesByProjectId(Integer projectid){
 
+        Collection<Project_Role> project_roles = projectMapper.ListProject_RoleByProjectid(projectid);
+        LambdaQueryWrapper<Role> lqw = new LambdaQueryWrapper<Role>();
+        ArrayList<Integer> roleids = new ArrayList<>();
+        for (Project_Role project_role : project_roles) {
+            roleids.add(project_role.getRoleId());
+        }
+        lqw.in(Role::getId,roleids);
+        Collection<Role> roles = roleMapper.selectList(lqw);
+        return roles;
+    }
 }

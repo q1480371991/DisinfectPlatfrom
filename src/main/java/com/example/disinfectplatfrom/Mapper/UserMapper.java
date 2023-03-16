@@ -2,6 +2,7 @@ package com.example.disinfectplatfrom.Mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.example.disinfectplatfrom.Pojo.User;
+import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
 import org.springframework.stereotype.Component;
@@ -20,4 +21,6 @@ public interface UserMapper extends BaseMapper<User> {
     public Collection<Integer> ListUserIdInOrgnizationById(int orgnizationid);
     @Select("SELECT userid FROM project_user WHERE projectid=#{projectid}")
     public Collection<Integer> ListUserIdInProjectById(int projectid);
+    @Insert("INSERT INTO user_role VALUES(NULL,#{userid},#{roleid})")
+    public void AddUser_Role(Integer userid,Integer roleid);
 }

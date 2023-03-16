@@ -17,6 +17,7 @@ import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 @SpringBootTest
 public class tset {
@@ -34,7 +35,6 @@ public class tset {
     AuthorityMapper authorityMapper;
     @Test
     public void test1(){
-        Collection<Authority> authorities = authorityMapper.ListAuthoritiesByRoleId(1);
-        System.out.println(authorities);
+
     }
 }

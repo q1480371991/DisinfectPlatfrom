@@ -6,6 +6,7 @@ import com.example.disinfectplatfrom.Pojo.User;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 public interface UserService {
 
@@ -34,10 +35,10 @@ public interface UserService {
     public void AddProjectAdmin(User user);
 
     //小程序用户注册
-    public void AddSmallRoutineUser(User user);
+    public void AddSmallRoutineUser(User user,Integer orgnizationid);
 
-    //添加组织用户，仅限项目管理员
-    public void AddOrginationUser(User user);
+    //添加项目用户，仅限项目管理员
+    public void AddProjectUser(User user,Integer projectid,Integer roleid);
 
     //查询用户
     public Collection<User> SelectUser(String s, Integer projectid,Integer status,String email,String phonenumber);
@@ -47,4 +48,7 @@ public interface UserService {
 
     //新增角色
     public void AddRole(Role role, Integer projectid, List<Integer> authorities,Integer quantity,List<Integer> orgnizations);
+
+    //查询项目下的角色
+    public Collection<Role> ListRolesByProjectId(Integer projectid);
 }

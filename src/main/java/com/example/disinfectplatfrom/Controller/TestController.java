@@ -1,5 +1,6 @@
 package com.example.disinfectplatfrom.Controller;
 
+import com.example.disinfectplatfrom.Pojo.Role;
 import com.example.disinfectplatfrom.Pojo.User;
 import com.example.disinfectplatfrom.Service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -19,19 +20,23 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
-import java.util.Collection;
-import java.util.Map;
+import java.util.*;
 
 @RestController
 public class TestController {
     @Autowired
     UserService userService;
     @RequestMapping(value = "test")
-    public String test(HttpServletRequest request) throws IOException {
-        Map<String, Object> userInfo = new ObjectMapper().readValue(request.getInputStream(), Map.class);
-        System.out.println(userInfo.get("s1").getClass());
-
-        return "test";
+    public Collection test(HttpServletRequest request) throws IOException {
+        Collection<Map<String, Object>> res = new ArrayList<>();
+        Collection<Role> roles = userService.ListRolesByProjectId(1);
+        for (Role role : roles) {
+            HashMap hashMap = new HashMap();
+            hashMap.put("project_roleid",role.getId());
+            hashMap.put("role_name",role.getRemark());
+            res.add(hashMap);
+        }
+        return res;
     }
 
     @RequestMapping(value = "test1")
@@ -40,6 +45,20 @@ public class TestController {
         User currentUser = (User)authentication.getPrincipal();
         System.out.println(currentUser.getAuthorities());
         return true;
+    }
+
+    //
+    @RequestMapping(value = "test2")
+    public Collection GetRolesByOrgnizationid(Integer orgnizationid) throws IOException {
+        Collection<Map<String, Object>> res = new ArrayList<>();
+        Collection<Role> roles = userService.ListRolesByProjectId(1);
+        for (Role role : roles) {
+            HashMap hashMap = new HashMap();
+            hashMap.put("project_roleid",role.getId());
+            hashMap.put("role_name",role.getRemark());
+            res.add(hashMap);
+        }
+        return res;
     }
 
 }
