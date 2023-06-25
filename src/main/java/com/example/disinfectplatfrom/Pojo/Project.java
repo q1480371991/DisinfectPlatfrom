@@ -1,8 +1,12 @@
 package com.example.disinfectplatfrom.Pojo;
 
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import lombok.Data;
+
+import java.sql.Timestamp;
+
 /**
  * @author : Lin
  * @version : [v1.0]
@@ -20,8 +24,9 @@ public class Project {
     private Integer projectId;
     private String projectName;
     private int adminId;
-    private String creaTime;
-    private String updateTime;
+    private Timestamp creatTime;
+    @TableField("update_time")
+    private Timestamp updateTime;
     private String remark;
     private int originAccountId;
     private int delFlag;

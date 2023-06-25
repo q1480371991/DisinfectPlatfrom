@@ -1,5 +1,6 @@
 package com.example.disinfectplatfrom.Controller;
 
+import com.example.disinfectplatfrom.Utils.R;
 import com.google.code.kaptcha.Producer;
 import org.apache.tomcat.util.codec.binary.Base64;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +34,7 @@ public class VerfyCodeController {
     }
 
     @GetMapping("/vc.jpg")
-    public String getVerifyCode(HttpSession session) throws IOException {
+    public R getVerifyCode(HttpSession session) throws IOException {
         //1.生成验证码
         String text=producer.createText();
         //2.放入session/redis实现
@@ -44,6 +45,8 @@ public class VerfyCodeController {
         ImageIO.write(image,"jpg",fos);
         //4.返回base64
         //前端要在返回的String前拼接data:image/png;base64
-        return Base64.encodeBase64String(fos.toByteArray());
+        R r = new R();
+        r.setData(Base64.encodeBase64String(fos.toByteArray()));
+        return r;
     }
 }

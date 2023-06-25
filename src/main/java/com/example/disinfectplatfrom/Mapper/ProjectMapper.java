@@ -29,7 +29,7 @@ public interface ProjectMapper extends BaseMapper<Project> {
     @Select("SELECT * FROM project_roles WHERE project_id=#{projectid} AND role_id=#{roleid}")
     public Project_Role SelectProject_Role(Integer projectid, Integer roleid);
 
-    @Select("SELECT orgnization_id WHERE project_id=#{projectid}")
+    @Select("SELECT orgnization_id FROM orgnization_project WHERE project_id=#{projectid}")
     public Collection<Integer> ListOrgnizationidsByProjectid(Integer projectid);
 
 }

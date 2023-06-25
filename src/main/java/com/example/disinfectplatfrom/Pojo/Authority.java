@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import lombok.Data;
 
+import java.sql.Timestamp;
 import java.util.Date;
 
 /**
@@ -23,7 +24,7 @@ public class Authority {
     private String authorityName;
     private String name;
     private Integer status;
-    private String updateTime;
+    private Timestamp updateTime;
     private Integer delFlag;
     private String remark;
 }

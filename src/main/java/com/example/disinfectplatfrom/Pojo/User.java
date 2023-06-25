@@ -10,6 +10,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.util.ObjectUtils;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collection;
 /**
@@ -35,12 +36,12 @@ public class User implements UserDetails {
     private String email;
     private String phonenumber;
     private int sex;
-    private String createTime;
-    private String updateTime;
+    private Timestamp createTime;
+    private Timestamp updateTime;
     private int delFlag;
     private String remark;
     @TableField(exist = false)
-    private Collection<Role> roles;//关系属性 用来存储当前用户所有角色信息
+    private Collection<String> roles;//关系属性 用来存储当前用户所有角色信息
     @TableField(exist = false)
     private Collection<Authority> authorities;
     private int isfirst;
@@ -55,8 +56,8 @@ public class User implements UserDetails {
      **/
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        if(!ObjectUtils.isEmpty(this.authorities)){
-            Collection<GrantedAuthority> authoritylist = new ArrayList<>();
+        if(!ObjectUtils.isEmpty(this.authorities) && !ObjectUtils.isEmpty(this.roles)){
+            Collection<GrantedAuthority> authoritylist = new ArrayList<GrantedAuthority>();
             for (Authority authority:this.authorities
             ) {
                 if(!ObjectUtils.isEmpty(authority)){
@@ -65,11 +66,32 @@ public class User implements UserDetails {
                     authoritylist.add(simpleGrantedAuthority);
                 }
             }
+            for (String role : this.roles) {
+                if(!ObjectUtils.isEmpty(role)){
+                    //没写完
+                    SimpleGrantedAuthority simpleGrantedAuthority = new SimpleGrantedAuthority(role);
+                    authoritylist.add(simpleGrantedAuthority);
+                }
+            }
             return authoritylist;
         }else{
             return null;
         }
 
+    }
+
+    public void setRoles(Collection<Role> roles)  {
+        if(!ObjectUtils.isEmpty(roles)){
+            Collection<String> myroles= new ArrayList<String>();
+            for (Role role : roles) {
+                if (!ObjectUtils.isEmpty(role)){
+                    myroles.add(role.getRoleName());
+                }
+            }
+            this.roles=myroles;
+        }else{
+            System.out.println("Roles不存在");
+        }
     }
 
     @Override

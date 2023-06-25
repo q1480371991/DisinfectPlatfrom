@@ -7,7 +7,7 @@ import lombok.Data;
 /**
  * @author : Lin
  * @version : [v1.0]
- * @className : Device
+ * @className : DeviceService
  * @description : 描述说明该类的功能
  * @createTime : 2023/3/16 20:26
  * @updateUser : Lin

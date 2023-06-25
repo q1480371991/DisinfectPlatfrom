@@ -1,13 +1,16 @@
 package com.example.disinfectplatfrom.Controller;
 
+import com.example.disinfectplatfrom.Pojo.Authority;
 import com.example.disinfectplatfrom.Pojo.Role;
 import com.example.disinfectplatfrom.Pojo.User;
 import com.example.disinfectplatfrom.Service.UserService;
+import com.example.disinfectplatfrom.Utils.R;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.deploy.net.HttpRequest;
 import com.sun.deploy.net.HttpResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -38,13 +41,11 @@ public class TestController {
         }
         return res;
     }
-
+//    @PreAuthorize("hasRole('HW')")
     @RequestMapping(value = "test1")
-    public boolean test1(@RequestBody Map<String,Object> info) throws IOException {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        User currentUser = (User)authentication.getPrincipal();
-        System.out.println(currentUser.getAuthorities());
-        return true;
+    public R test1(@RequestBody Map<String,Object> info) throws IOException {
+        userService.UpdatePassword("1234");
+        return null;
     }
 
     //

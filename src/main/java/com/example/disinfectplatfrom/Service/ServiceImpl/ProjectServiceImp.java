@@ -69,9 +69,10 @@ public class ProjectServiceImp implements ProjectService {
 
     @Override
     public Collection<Orgnization> ListOrgnizationByProjectid(Integer projectid) {
-        Collection<Integer> projectids = projectMapper.ListOrgnizationidsByProjectid(projectid);
+        Collection<Integer> Orgnizationids = projectMapper.ListOrgnizationidsByProjectid(projectid);
+        System.out.println(Orgnizationids);
         LambdaQueryWrapper<Orgnization> lqw = new LambdaQueryWrapper<Orgnization>();
-        lqw.in(Orgnization::getId,projectids);
+        lqw.in(Orgnization::getId,Orgnizationids);
         List<Orgnization> orgnizations = orgnizationMapperg.selectList(lqw);
         return orgnizations;
     }

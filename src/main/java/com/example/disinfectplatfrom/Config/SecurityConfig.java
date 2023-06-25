@@ -1,6 +1,10 @@
 package com.example.disinfectplatfrom.Config;
 
 import com.example.disinfectplatfrom.Filter.LoginFilter;
+import com.example.disinfectplatfrom.Handler.MyAccessDeniedHandler;
+import com.example.disinfectplatfrom.Handler.MyAuthenticationEntryPoint;
+import com.example.disinfectplatfrom.Handler.MyAuthenticationFailureHandler;
+import com.example.disinfectplatfrom.Handler.MyAuthenticationSuccessHandler;
 import com.example.disinfectplatfrom.Pojo.User;
 import com.example.disinfectplatfrom.Service.MyUserDetailService;
 import com.example.disinfectplatfrom.Service.ServiceImpl.MyPersistentTokenBasedRemeberMeServiceImpl;
@@ -25,6 +29,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import javax.annotation.Resources;
 import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
 import java.util.*;
@@ -36,6 +41,18 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private final DataSource dataSource;
 
     private final MyUserDetailService myUserDetailService;
+
+    @Autowired
+    private MyAuthenticationSuccessHandler myAuthenticationSuccessHandler;
+
+    @Autowired
+    MyAuthenticationFailureHandler myAuthenticationFailureHandler;
+
+    @Autowired
+    private MyAuthenticationEntryPoint myAuthenticationEntryPoint;
+
+    @Autowired
+    private MyAccessDeniedHandler myAccessDeniedHandler;
 
     @Autowired
     public SecurityConfig(MyUserDetailService myUserDetailService,DataSource dataSource) {
@@ -81,15 +98,13 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .rememberMeServices(rememberMeServices())//设置自动登录使用哪个 rememberMeServices
 //                .tokenRepository(persistentTokenRepository())
                 .and()
-                .exceptionHandling()
-                .authenticationEntryPoint((req,resp,ex)->{
-                    resp.setContentType(MediaType.APPLICATION_JSON_UTF8_VALUE);
-                    resp.setStatus(HttpStatus.UNAUTHORIZED.value());
-                    resp.getWriter().println("请认证之后再去处理！");
-                })
-                .and()
                 .cors()//跨域处理方案
                 .configurationSource(corsConfiguration())//跨域未测试
+                //处理未认证、权限不足
+                .and()
+                .exceptionHandling()
+                .authenticationEntryPoint(myAuthenticationEntryPoint)
+                .accessDeniedHandler(myAccessDeniedHandler)
                 .and()
                 .csrf().disable()
                 .sessionManagement()//开启会话管理
@@ -156,26 +171,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         loginFilter.setAuthenticationManager(authenticationManagerBean());
         loginFilter.setRememberMeServices(rememberMeServices());//设置认证成功时使用自定义rememberMeServices
 
-        loginFilter.setAuthenticationSuccessHandler((req,resp,authentication)->{
-            Map<String,Object> result=new HashMap<String,Object>();
-            result.put("msg","登录成功");
-            User user =(User) authentication.getPrincipal();
-            //避免暴露密码
-            user.setPassword(null);
-            result.put("用户信息",user);
-            resp.setStatus(HttpStatus.OK.value());
-            resp.setContentType("application/json;charset=UTF-8");
-            String s = new ObjectMapper().writeValueAsString(result);
-            resp.getWriter().println(s);
-        });//认证成功处理
-        loginFilter.setAuthenticationFailureHandler((req,resp,ex)->{
-            Map<String,Object> result=new HashMap<String,Object>();
-            result.put("msg","登录失败"+ex.getMessage());
-            resp.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
-            resp.setContentType("application/json;charset=UTF-8");
-            String s = new ObjectMapper().writeValueAsString(result);
-            resp.getWriter().println(s);
-        });//认证失败处理
+        loginFilter.setAuthenticationSuccessHandler(myAuthenticationSuccessHandler);//认证成功处理
+        loginFilter.setAuthenticationFailureHandler(myAuthenticationFailureHandler);//认证失败处理
         return loginFilter;
     }
 

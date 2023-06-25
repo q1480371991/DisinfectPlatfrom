@@ -34,10 +34,12 @@ public class MyUserDetailServiceImpl implements MyUserDetailService {
         }
         //查询用户的roles字符串
         Collection<Role> roles = roleMapper.ListRolesByUserId(user.getId());
+
         user.setRoles(roles);
         //查询用户的authority字符串
         Collection<Authority> authorities = authorityMapper.ListAuthoritiesByUserId(user.getId());
         user.setAuthorities(authorities);
+        System.out.println();
 
         return user;
     }

@@ -9,6 +9,7 @@ import com.example.disinfectplatfrom.Pojo.Role;
 import com.example.disinfectplatfrom.Pojo.User;
 import com.example.disinfectplatfrom.Service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -49,6 +50,7 @@ public class UserServiceImp implements UserService {
      * @return :java.util.Collection<com.example.disinfectplatfrom.Pojo.User>
      **/
     @Override
+
     public Collection<User> ListAllUser()
     {
         QueryWrapper<User> queryWrapper = new QueryWrapper<User>();
@@ -73,12 +75,14 @@ public class UserServiceImp implements UserService {
     public void UpdatePassword(String password) {
         //获取当前用户信息
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        User currentUser = (User)authentication.getPrincipal();
+        User user = (User)authentication.getPrincipal();
         LambdaQueryWrapper<User> lqw = new LambdaQueryWrapper<User>();
         //直接修改当前用户的密码，不需要前端传用户id
-        User user = userMapper.selectById(currentUser.getId());
         password="{noop}"+password;
         user.setPassword(password);
+        if (user.getIsfirst()==1){
+            user.setIsfirst(0);
+        }
         userMapper.updateById(user);
     }
 
@@ -164,6 +168,7 @@ public class UserServiceImp implements UserService {
      * @Param :[projectid]
      * @return :java.util.Collection<com.example.disinfectplatfrom.Pojo.Project>
      **/
+    @Override
     public Collection<Project> ListProjectsByAdminid(Integer adminid)
     {
         LambdaQueryWrapper<Project> lqw = new LambdaQueryWrapper<>();
@@ -183,8 +188,9 @@ public class UserServiceImp implements UserService {
      **/
     @Override
     public void AddProject(Project project,Integer orgnizationid) {
-        orgnizationMapper.AddOrgnization_Project(orgnizationid,project.getId());
         projectMapper.insert(project);
+        orgnizationMapper.AddOrgnization_Project(orgnizationid,project.getId());
+
     }
 
     /*
@@ -323,9 +329,7 @@ public class UserServiceImp implements UserService {
         if(!ObjectUtils.isEmpty(user)){
             return false;
         }
-        else {
-            return true;
-        }
+        return true ;
     }
 
     /*
