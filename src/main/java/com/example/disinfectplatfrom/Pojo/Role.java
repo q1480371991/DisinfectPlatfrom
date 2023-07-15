@@ -21,8 +21,8 @@ public class Role {
     @TableField(value ="remark" )
     private String remark;
     private Integer delFlag;
-    private Timestamp createTime;
-    private Timestamp updateTime;
+    private String createTime;
+    private String updateTime;
 
 
 }

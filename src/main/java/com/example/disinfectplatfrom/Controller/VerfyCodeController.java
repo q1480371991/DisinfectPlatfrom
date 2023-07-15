@@ -46,7 +46,7 @@ public class VerfyCodeController {
         //4.返回base64
         //前端要在返回的String前拼接data:image/png;base64
         R r = new R();
-        r.setData(Base64.encodeBase64String(fos.toByteArray()));
+        r.setData("data:image/png;base64,"+Base64.encodeBase64String(fos.toByteArray()));
         return r;
     }
 }

@@ -9,6 +9,7 @@ import com.example.disinfectplatfrom.Pojo.User;
 import com.example.disinfectplatfrom.Service.DeviceService;
 import com.example.disinfectplatfrom.Service.ProjectService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 
@@ -33,6 +34,15 @@ public class DeviceServiceImpl implements DeviceService {
     ProjectMapper projectMapper;
     @Autowired
     DeviceMapper deviceMapper;
+
+    /*
+     * @title :ListDeviceByOrignizationId
+     * @Author :Lin
+     * @Description : 获得组织下所有设备   仅限？？？
+     * @Date :14:00 2023/7/15
+     * @Param :[deviceid]
+     * @return :java.util.Collection<com.example.disinfectplatfrom.Pojo.Device>
+     **/
     @Override
     public Collection<Device> ListDeviceByOrignizationId(Integer deviceid){
         Collection<Device> devices = deviceMapper.ListDeviceByOrignizationId(deviceid);
@@ -42,6 +52,15 @@ public class DeviceServiceImpl implements DeviceService {
         return devices;
     }
 
+    /*
+     * @title :ListDeviceByProjectId
+     * @Author :Lin
+     * @Description :  获得项目下所有设备   仅限？？？
+     * @Date :13:58 2023/7/15
+     * @Param :[projectid]
+     * @return :java.util.Collection<com.example.disinfectplatfrom.Pojo.Device>
+     **/
+//    @PreAuthorize("hasAuthority('mocha_itom')")
     @Override
     public Collection<Device> ListDeviceByProjectId(Integer projectid){
         Collection<Device>res = new ArrayList<Device>();
@@ -51,12 +70,23 @@ public class DeviceServiceImpl implements DeviceService {
         }
         return res;
     }
+    /*
+     * @title :AddDevice
+     * @Author :Lin
+     * @Description : 添加设备   仅组织管理员
+     * @Date :21:36 2023/7/14
+     * @Param :[device]
+     * @return :void
+     **/
+    @PreAuthorize("hasRole('OA') and hasAuthority('mocha_itom')")
     @Override
     public void AddDevice(Device device,Integer orgnizationid)
     {
-//        deviceMapper.insert(device)
-        deviceMapper.insert(device);
-        deviceMapper.AddOrgnization_Device(orgnizationid,device.getId());
+
+        if (!ObjectUtils.isEmpty(device)){
+            deviceMapper.insert(device);
+            deviceMapper.AddOrgnization_Device(orgnizationid,device.getId());
+        }
 
     }
 }

@@ -25,27 +25,21 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.*;
 
+//@PreAuthorize("hasRole('OA')")
 @RestController
 public class TestController {
     @Autowired
     UserService userService;
     @RequestMapping(value = "test")
-    public Collection test(HttpServletRequest request) throws IOException {
-        Collection<Map<String, Object>> res = new ArrayList<>();
-        Collection<Role> roles = userService.ListRolesByProjectId(1);
-        for (Role role : roles) {
-            HashMap hashMap = new HashMap();
-            hashMap.put("project_roleid",role.getId());
-            hashMap.put("role_name",role.getRemark());
-            res.add(hashMap);
-        }
-        return res;
+//    @PreAuthorize("hasAuthority('data_analysis')")
+    public R test(HttpServletRequest request) throws IOException {
+        return new R("true");
     }
 //    @PreAuthorize("hasRole('HW')")
     @RequestMapping(value = "test1")
     public R test1(@RequestBody Map<String,Object> info) throws IOException {
-        userService.UpdatePassword("1234");
-        return null;
+        Collection<User> users = userService.ListAllUser();
+        return new R(users);
     }
 
     //

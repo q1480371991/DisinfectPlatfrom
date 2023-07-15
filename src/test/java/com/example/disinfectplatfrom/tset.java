@@ -5,10 +5,7 @@ import com.example.disinfectplatfrom.Mapper.AuthorityMapper;
 import com.example.disinfectplatfrom.Mapper.ProjectMapper;
 import com.example.disinfectplatfrom.Mapper.RoleMapper;
 import com.example.disinfectplatfrom.Mapper.UserMapper;
-import com.example.disinfectplatfrom.Pojo.Authority;
-import com.example.disinfectplatfrom.Pojo.Device;
-import com.example.disinfectplatfrom.Pojo.Project;
-import com.example.disinfectplatfrom.Pojo.Role;
+import com.example.disinfectplatfrom.Pojo.*;
 import com.example.disinfectplatfrom.Service.DeviceService;
 import com.example.disinfectplatfrom.Service.ProjectService;
 import com.example.disinfectplatfrom.Service.ServiceImpl.MyUserDetailServiceImpl;
@@ -19,10 +16,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @SpringBootTest
 public class tset {
@@ -44,6 +38,9 @@ public class tset {
     ProjectService projectService;
     @Test
     public void test1(){
-        System.out.println(userService.ListRolesByProjectId(1));
+        Role role = new Role(null, "q", "0", 0, "2023-07-14 21:20:09", "2023-07-14 21:20:09");
+        int insert = roleMapper.insert(role);
+        System.out.println(role.getId());
+
     }
 }

@@ -1,8 +1,11 @@
 package com.example.disinfectplatfrom.Utils;
 
+import com.example.disinfectplatfrom.Pojo.User;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.Collection;
 
 @Data
 //数据工具类
@@ -19,4 +22,7 @@ public class R {
     public R() {}
 
 
+    public R(Object data) {
+        this.data=data;
+    }
 }

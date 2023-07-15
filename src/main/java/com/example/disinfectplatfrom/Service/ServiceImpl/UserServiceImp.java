@@ -3,18 +3,20 @@ package com.example.disinfectplatfrom.Service.ServiceImpl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.example.disinfectplatfrom.Mapper.*;
-import com.example.disinfectplatfrom.Pojo.Project;
-import com.example.disinfectplatfrom.Pojo.Project_Role;
-import com.example.disinfectplatfrom.Pojo.Role;
-import com.example.disinfectplatfrom.Pojo.User;
+import com.example.disinfectplatfrom.Pojo.*;
 import com.example.disinfectplatfrom.Service.UserService;
+import com.sun.org.apache.bcel.internal.generic.IF_ACMPEQ;
+import com.sun.org.apache.xpath.internal.operations.Bool;
+import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 
+import java.lang.reflect.Array;
 import java.util.*;
 
 /**
@@ -28,6 +30,7 @@ import java.util.*;
  * @updateRemark : 描述说明本次修改内容
  */
 @SuppressWarnings({"ALL", "AlibabaClassMustHaveAuthor"})
+@Data
 @Service
 public class UserServiceImp implements UserService {
     @Autowired
@@ -40,6 +43,8 @@ public class UserServiceImp implements UserService {
     private RoleMapper roleMapper;
     @Autowired
     private AuthorityMapper authorityMapper;
+    @Autowired
+    private DeviceMapper deviceMapper;
 
     /*
      * @title :ListAllUser
@@ -50,7 +55,7 @@ public class UserServiceImp implements UserService {
      * @return :java.util.Collection<com.example.disinfectplatfrom.Pojo.User>
      **/
     @Override
-
+    @PreAuthorize("hasRole('HW')")
     public Collection<User> ListAllUser()
     {
         QueryWrapper<User> queryWrapper = new QueryWrapper<User>();
@@ -89,11 +94,12 @@ public class UserServiceImp implements UserService {
     /*
      * @title :ListUserByProjectId
      * @Author :Lin
-     * @Description : 获取项目下所有账号信息
+     * @Description : 获取项目下所有账号信息  仅项目管理员
      * @Date :22:40 2023/3/1
      * @Param :[projectid] [flag]:0查询的List包括项目管理员和初始账号，1不包括
      * @return :java.util.Collection<com.example.disinfectplatfrom.Pojo.User>
      **/
+    @PreAuthorize("hasRole('PA')")
     @Override
     public Collection<User> ListUserByProjectId(Integer projectid, Integer flag) {
         List<User> users;
@@ -121,11 +127,12 @@ public class UserServiceImp implements UserService {
     /*
      * @title :ListUserByProjectAdminId
      * @Author :Lin
-     * @Description : 获取项目管理员所有项目下的账号信息
+     * @Description : 获取项目管理员所有项目下的账号信息   待改，项目管理员只管理一个项目
      * @Date :22:41 2023/3/1
      * @Param :[]
      * @return :java.util.Collection<com.example.disinfectplatfrom.Pojo.User>
      **/
+    @PreAuthorize("hasRole('PA')")
     @Override
     public Collection<User> ListUserByProjectAdminId() {
         Collection<User> res=new ArrayList<User>();
@@ -146,11 +153,13 @@ public class UserServiceImp implements UserService {
     /*
      * @title :ListAllProject
      * @Author :Lin
-     * @Description : 获取所有项目信息
+     * @Description : 获取所有项目信息,仅限海威账号
      * @Date :22:41 2023/3/1
      * @Param :[]
      * @return :java.util.Collection<com.example.disinfectplatfrom.Pojo.Project>
      **/
+
+    @PreAuthorize("hasRole('HW')")
     @Override
     public Collection<Project> ListAllProject() {
         LambdaQueryWrapper<Project> lqw = new LambdaQueryWrapper<>();
@@ -163,11 +172,12 @@ public class UserServiceImp implements UserService {
     /*
      * @title :ListProjectsByAdminid
      * @Author :Lin
-     * @Description : 返回项目管理员下的项目信息
+     * @Description : 返回项目管理员下的项目信息  仅限项目管理员    未完成：一个项目管理员只能管理一个项目
      * @Date :21:09 2023/3/16
      * @Param :[projectid]
      * @return :java.util.Collection<com.example.disinfectplatfrom.Pojo.Project>
      **/
+    @PreAuthorize("hasRole('PA')")
     @Override
     public Collection<Project> ListProjectsByAdminid(Integer adminid)
     {
@@ -186,12 +196,44 @@ public class UserServiceImp implements UserService {
      * @Param :[project]
      * @return :void
      **/
+    @PreAuthorize("hasRole('HW')")
     @Override
-    public void AddProject(Project project,Integer orgnizationid) {
-        projectMapper.insert(project);
-        orgnizationMapper.AddOrgnization_Project(orgnizationid,project.getId());
+    public Boolean AddProject(Project project) {
+        int insert = projectMapper.insert(project);
+        return insert==1;
 
     }
+    /*
+     * @title :AddProjectOriginAccount
+     * @Author :Lin
+     * @Description : 创建项目初始账号，仅海威账号
+     * @Date :16:38 2023/7/14
+     * @Param :[projectid, user]
+     * @return :void
+     **/
+    @PreAuthorize("hasRole('HW')")
+    @Override
+    public void AddProjectOriginAccount(Integer projectid,User user){
+        if (!ObjectUtils.isEmpty(user)){
+
+            //插入user
+            userMapper.insert(user);
+            //个体user分配项目创始人的权限or角色
+            projectMapper.AddProject_User(projectid,user.getId());
+            userMapper.AddUser_Role(user.getId(),6);
+
+            //修改项目的OriginAccountId
+            LambdaQueryWrapper<Project> lqw = new LambdaQueryWrapper<>();
+            lqw.eq(Project::getProjectId,projectid);
+            Project project = projectMapper.selectOne(lqw);
+            project.setOriginAccountId(user.getId());
+            projectMapper.updateById(project);
+
+        }
+
+    }
+
+
 
     /*
      * @title :UpdateProjectId
@@ -201,6 +243,7 @@ public class UserServiceImp implements UserService {
      * @Param :[id, projectname, remark]
      * @return :void
      **/
+    @PreAuthorize("hasRole('HW')")
     @Override
     public void UpdateProjectById(int projectid, String projectname, String remark) {
         Project project = projectMapper.selectById(projectid);
@@ -208,16 +251,35 @@ public class UserServiceImp implements UserService {
         project.setRemark(remark);
         projectMapper.updateById(project);
     }
+    /*
+     * @title :UpdataProjectAdmin
+     * @Author :Lin
+     * @Description : 选择项目管理员管理的项目，仅海威账号
+     * @Date :16:32 2023/7/14
+     * @Param :[adminid]
+     * @return :void
+     **/
+    @PreAuthorize("hasRole('HW')")
+    @Override
+    public void UpdataProjectAdmin(Integer projectid,Integer adminid){
+        LambdaQueryWrapper<Project> lqw = new LambdaQueryWrapper<>();
+        lqw.eq(Project::getProjectId,projectid);
+        Project project = projectMapper.selectOne(lqw);
+        project.setAdminId(adminid);
+        projectMapper.updateById(project);
+    }
+
 
     /*
      * @title :ListUserByOrgnizationId
      * @Author :Lin
-     * @Description : 获取组织下的所有账号信息
+     * @Description : 获取组织下的所有账号信息   仅组织管理员
      * @Date :22:43 2023/3/1
      * @Param :[id]
      * @return :java.util.Collection<com.example.disinfectplatfrom.Pojo.User>
      **/
     @Override
+    @PreAuthorize("hasRole('OA')")
     public Collection<User> ListUserByOrgnizationId(int projectid) {
         Collection<Integer> userids = userMapper.ListUserIdInOrgnizationById(projectid);
         LambdaQueryWrapper<User> lqw = new LambdaQueryWrapper<User>();
@@ -228,14 +290,18 @@ public class UserServiceImp implements UserService {
     /*
      * @title :AddProjectAdmin
      * @Author :Lin
-     * @Description : 添加组织管理员，仅限海威账号
+     * @Description : 添加项目管理员账号，仅限海威账号
      * @Date :22:56 2023/3/6
      * @Param :[user]
      * @return :void
      **/
+    @PreAuthorize("hasRole('HW')")
     @Override
     public void AddProjectAdmin(User user) {
+        //插入user
         userMapper.insert(user);
+        //给user分配项目管理员的权限
+        userMapper.AddUser_Role(user.getId(),3);
     }
 
     /*
@@ -276,6 +342,7 @@ public class UserServiceImp implements UserService {
      * @Param :[user]
      * @return :void
      **/
+    @PreAuthorize("hasRole('PA')")
     @Override
     public void AddProjectUser(User user,Integer projectid,Integer roleid){
         //先查询该项目下该角色的信息
@@ -296,6 +363,62 @@ public class UserServiceImp implements UserService {
             throw new RuntimeException("当前角色数量已满");
         }
     }
+
+    /*
+     * @title :ListOrgnizationByProjectid
+     * @Author :Lin
+     * @Description :  项目管理员查询所管理项目下的组织    仅项目管理员
+     * @Date :20:56 2023/7/14
+     * @Param :[projectid]
+     * @return :java.util.ArrayList<com.example.disinfectplatfrom.Pojo.Orgnization>
+     **/
+    @PreAuthorize("hasRole('PA')")
+    @Override
+    public ArrayList<Orgnization> ListOrgnizationByProjectid(Integer projectid){
+
+        LambdaQueryWrapper<Orgnization> lqw = new LambdaQueryWrapper<Orgnization>();
+        Collection<Integer> orgnizationids = projectMapper.ListOrgnizationidsByProjectid(projectid);
+        lqw.in(Orgnization::getId,orgnizationids);
+        List<Orgnization> orgnizations =  orgnizationMapper.selectList(lqw);
+        return new ArrayList<>(orgnizations);
+    }
+
+
+
+    /*
+     * @title :AddOrganization
+     * @Author :Lin
+     * @Description : 添加组织 仅项目管理员
+     * @Date :17:35 2023/7/14
+     * @Param :[orgnization]
+     * @return :void
+     **/
+    @PreAuthorize("hasRole('PA')")
+    @Override
+    public void AddOrganization(Orgnization orgnization){
+        if (!ObjectUtils.isEmpty(orgnization))
+        {
+            //插入orgnization
+            orgnizationMapper.insert(orgnization);
+        }
+
+    }
+
+    /*
+     * @title :AddOrganization_Project
+     * @Author :Lin
+     * @Description : 往项目中添加组织 仅项目管理员
+     * @Date :17:39 2023/7/14
+     * @Param :[orgnizationid, projectid]
+     * @return :void
+     **/
+    @PreAuthorize("hasRole('PA')")
+    @Override
+    public void AddOrganization_Project(Integer orgnizationid,Integer projectid){
+        orgnizationMapper.AddOrgnization_Project(orgnizationid,projectid);
+    }
+
+
 
     /*
      * @title :AddSmallRoutineUser
@@ -335,11 +458,12 @@ public class UserServiceImp implements UserService {
     /*
      * @title :AddRole
      * @Author :Lin
-     * @Description : 增加角色，并维护角色与项目、组织、权限的关系
+     * @Description : 增加角色，并维护角色与项目、组织、权限的关系     仅限拥有角色管理权限的用户
      * @Date :14:10 2023/3/11
      * @Param :[role, projectid, authorities, quantity, orgnizationids]
      * @return :void
      **/
+    @PreAuthorize("hasAuthority('role_management')")
     @Override
     public void AddRole(Role role, Integer projectid, List<Integer> authorities,Integer quantity,List<Integer> orgnizationids) {
         roleMapper.insert(role);
@@ -357,11 +481,12 @@ public class UserServiceImp implements UserService {
     /*
      * @title :ListRolesByProjectId
      * @Author :Lin
-     * @Description : 查询项目下有什么角色信息
+     * @Description : 查询项目下有什么角色信息    仅限拥有角色管理权限的用户
      * @Date :11:00 2023/3/16
      * @Param :[projectid]
      * @return :void
      **/
+    @PreAuthorize("hasAuthority('role_management')")
     @Override
     public Collection<Role> ListRolesByProjectId(Integer projectid){
 
@@ -375,4 +500,6 @@ public class UserServiceImp implements UserService {
         Collection<Role> roles = roleMapper.selectList(lqw);
         return roles;
     }
+
+
 }
