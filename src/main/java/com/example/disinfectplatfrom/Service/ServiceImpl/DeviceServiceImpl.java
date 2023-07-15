@@ -38,11 +38,12 @@ public class DeviceServiceImpl implements DeviceService {
     /*
      * @title :ListDeviceByOrignizationId
      * @Author :Lin
-     * @Description : 获得组织下所有设备   仅限？？？
+     * @Description : 获得组织下所有设备   仅限项目管理员
      * @Date :14:00 2023/7/15
      * @Param :[deviceid]
      * @return :java.util.Collection<com.example.disinfectplatfrom.Pojo.Device>
      **/
+    @PreAuthorize("hasRole('PA')")
     @Override
     public Collection<Device> ListDeviceByOrignizationId(Integer deviceid){
         Collection<Device> devices = deviceMapper.ListDeviceByOrignizationId(deviceid);

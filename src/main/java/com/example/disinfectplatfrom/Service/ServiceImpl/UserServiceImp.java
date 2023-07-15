@@ -465,7 +465,9 @@ public class UserServiceImp implements UserService {
      **/
     @PreAuthorize("hasAuthority('role_management')")
     @Override
-    public void AddRole(Role role, Integer projectid, List<Integer> authorities,Integer quantity,List<Integer> orgnizationids) {
+    public void AddRole(Role role, Integer projectid,
+                        List<Integer> authorities,Integer quantity,
+                        List<Integer> orgnizationids) {
         roleMapper.insert(role);
         //该项目下有什么角色
         projectMapper.AddProject_Roles(projectid,role.getId(),quantity);
@@ -481,24 +483,28 @@ public class UserServiceImp implements UserService {
     /*
      * @title :ListRolesByProjectId
      * @Author :Lin
-     * @Description : 查询项目下有什么角色信息    仅限拥有角色管理权限的用户
+     * @Description : 查询项目下有什么角色信息    仅限拥有角色管理权限的账户
      * @Date :11:00 2023/3/16
      * @Param :[projectid]
      * @return :void
      **/
     @PreAuthorize("hasAuthority('role_management')")
     @Override
-    public Collection<Role> ListRolesByProjectId(Integer projectid){
+    public ArrayList ListRolesByProjectId(Integer projectid){
 
+        ArrayList<Map<String, Object>> res = new ArrayList<>();
         Collection<Project_Role> project_roles = projectMapper.ListProject_RoleByProjectid(projectid);
         LambdaQueryWrapper<Role> lqw = new LambdaQueryWrapper<Role>();
-        ArrayList<Integer> roleids = new ArrayList<>();
         for (Project_Role project_role : project_roles) {
-            roleids.add(project_role.getRoleId());
+            Map<String, Object> map = new HashMap<String,Object>();
+            Role role = roleMapper.selectById(project_role.getRoleId());
+            map.put("role",role);
+            map.put("max",project_role.getMaxAccount());
+            map.put("current",project_role.getCurrentAccount());
+            res.add(map);
         }
-        lqw.in(Role::getId,roleids);
-        Collection<Role> roles = roleMapper.selectList(lqw);
-        return roles;
+
+        return res;
     }
 
 

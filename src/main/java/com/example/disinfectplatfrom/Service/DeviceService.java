@@ -8,7 +8,7 @@ import java.util.Collection;
 public interface DeviceService {
     //获得组织下所有设备   仅限？？？
     public Collection<Device> ListDeviceByOrignizationId(Integer deviceid);
-    //获得项目下所有设备   仅限？？？
+    //获得项目下所有设备   仅限项目管理员
     public Collection<Device> ListDeviceByProjectId(Integer projectid);
 
     //添加设备   仅组织管理员

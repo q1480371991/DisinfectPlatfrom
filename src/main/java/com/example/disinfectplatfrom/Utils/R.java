@@ -25,4 +25,17 @@ public class R {
     public R(Object data) {
         this.data=data;
     }
+    public static R ok(Object data){
+        R r = new R(data);
+        r.setCode(200);
+        r.setMsg("请求成功");
+        return r;
+    }
+
+    public static R fail(Object data){
+        R r = new R(data);
+        r.setCode(201);
+        r.setMsg("请求失败");
+        return r;
+    }
 }

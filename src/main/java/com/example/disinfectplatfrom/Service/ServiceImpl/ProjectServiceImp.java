@@ -36,8 +36,9 @@ public class ProjectServiceImp implements ProjectService {
     @Override
     public void DeleteProjectById(Integer projectid,String password) {
         Collection<User> users = userService.ListUserByProjectId(projectid,1);
+        String mypassword="特殊密码";
         //当一个项目没有除项目管理员和项目创始人账号时才能删除
-        if (ObjectUtils.isEmpty(users)&&password.equalsIgnoreCase(password)){
+        if (ObjectUtils.isEmpty(users)&&mypassword.equalsIgnoreCase(password)){
             Project project = projectMapper.selectById(projectid);
             //逻辑删除
             project.setDelFlag(1);

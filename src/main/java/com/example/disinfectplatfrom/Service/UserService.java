@@ -73,8 +73,7 @@ public interface UserService {
     public void AddRole(Role role, Integer projectid, List<Integer> authorities,Integer quantity,List<Integer> orgnizations);
 
     //查询项目下的角色
-    public Collection<Role> ListRolesByProjectId(Integer projectid);
+    public ArrayList ListRolesByProjectId(Integer projectid);
 
-    //添加设备   仅组织管理员
-    public void AddDevice(Device device);
+
 }
