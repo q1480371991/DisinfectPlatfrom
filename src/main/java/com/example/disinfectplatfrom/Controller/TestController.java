@@ -5,6 +5,7 @@ import com.example.disinfectplatfrom.Pojo.Role;
 import com.example.disinfectplatfrom.Pojo.User;
 import com.example.disinfectplatfrom.Service.UserService;
 import com.example.disinfectplatfrom.Utils.R;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.deploy.net.HttpRequest;
 import com.sun.deploy.net.HttpResponse;
@@ -13,13 +14,11 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
@@ -36,10 +35,9 @@ public class TestController {
         return new R("true");
     }
 //    @PreAuthorize("hasRole('HW')")
-    @RequestMapping(value = "test1")
-    public R test1(@RequestBody Map<String,Object> info) throws IOException {
-        Collection<User> users = userService.ListAllUser();
-        return new R(users);
+    @RequestMapping(value = "test1",method = RequestMethod.POST)
+    public R test1(@RequestBody String data) throws IOException {
+        return R.ok(null);
     }
 
     //

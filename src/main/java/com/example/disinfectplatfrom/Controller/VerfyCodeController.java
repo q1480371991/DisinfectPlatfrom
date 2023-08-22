@@ -35,8 +35,10 @@ public class VerfyCodeController {
 
     @GetMapping("/vc.jpg")
     public R getVerifyCode(HttpSession session) throws IOException {
+        System.out.println(session.getId());
         //1.生成验证码
         String text=producer.createText();
+        System.out.println("验证码"+text);
         //2.放入session/redis实现
         session.setAttribute("kaptcha",text);
         //3.生成图片

@@ -1,10 +1,7 @@
 package com.example.disinfectplatfrom.Config;
 
 import com.example.disinfectplatfrom.Filter.LoginFilter;
-import com.example.disinfectplatfrom.Handler.MyAccessDeniedHandler;
-import com.example.disinfectplatfrom.Handler.MyAuthenticationEntryPoint;
-import com.example.disinfectplatfrom.Handler.MyAuthenticationFailureHandler;
-import com.example.disinfectplatfrom.Handler.MyAuthenticationSuccessHandler;
+import com.example.disinfectplatfrom.Handler.*;
 import com.example.disinfectplatfrom.Pojo.User;
 import com.example.disinfectplatfrom.Service.MyUserDetailService;
 import com.example.disinfectplatfrom.Service.ServiceImpl.MyPersistentTokenBasedRemeberMeServiceImpl;
@@ -24,6 +21,7 @@ import org.springframework.security.web.authentication.RememberMeServices;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.rememberme.JdbcTokenRepositoryImpl;
 import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.session.HttpSessionEventPublisher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -55,6 +53,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private MyAccessDeniedHandler myAccessDeniedHandler;
 
     @Autowired
+    private MyLogoutSuccessHandler myLogoutSuccessHandler;
+
+    @Autowired
     public SecurityConfig(MyUserDetailService myUserDetailService,DataSource dataSource) {
         this.dataSource=dataSource;
         this.myUserDetailService = myUserDetailService;
@@ -84,15 +85,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .and().formLogin()
                 .and()
                 .logout().logoutUrl("/logout")
-                  .logoutSuccessHandler((res,resp,authentication)->{
-                    Map<String,Object> result=new HashMap<String,Object>();
-                    result.put("msg","注销成功");
-                    result.put("用户信息",authentication.getPrincipal());
-                    resp.setStatus(HttpStatus.OK.value());
-                    resp.setContentType("application/json;charset=UTF-8");
-                    String s = new ObjectMapper().writeValueAsString(result);
-                    resp.getWriter().println(s);
-                })
+                .logoutSuccessHandler(myLogoutSuccessHandler)
                 .and()
                 .rememberMe() //开启记住我功能
                 .rememberMeServices(rememberMeServices())//设置自动登录使用哪个 rememberMeServices
@@ -100,14 +93,18 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                 .cors()//跨域处理方案
                 .configurationSource(corsConfiguration())//跨域未测试
-                //处理未认证、权限不足
+//                处理未认证、权限不足
                 .and()
                 .exceptionHandling()
                 .authenticationEntryPoint(myAuthenticationEntryPoint)
                 .accessDeniedHandler(myAccessDeniedHandler)
                 .and()
-                .csrf().disable()
+                .csrf()
+//                .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+                .disable()
+//                .and()
                 .sessionManagement()//开启会话管理
+
                 .maximumSessions(1)//单点登录未测试
                 .maxSessionsPreventsLogin(true)
                 .expiredSessionStrategy((event -> {
@@ -176,11 +173,5 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         return loginFilter;
     }
 
-    //行不通
-//    @Bean
-//    public com.example.disinfectplatfrom.Pojo.User CurrentUser(){
-//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-//        com.example.disinfectplatfrom.Pojo.User user = (com.example.disinfectplatfrom.Pojo.User)authentication.getPrincipal();
-//        return user;
-//    }
+
 }

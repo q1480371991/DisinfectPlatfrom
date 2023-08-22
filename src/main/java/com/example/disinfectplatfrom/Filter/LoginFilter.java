@@ -52,6 +52,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
                 }
                 System.out.println("用户名: " + username + " 密码: " + password+" 验证码："+kaptcha+" remember-me："+remembermeValue);
                 //获取session中的验证码
+                System.out.println(request.getSession().getId());
                 String sessionVerifyCode =(String) request.getSession().getAttribute(getKaptchaParameter());
                 if(!ObjectUtils.isEmpty(kaptcha)&&!ObjectUtils.isEmpty(sessionVerifyCode)&&kaptcha.equalsIgnoreCase(sessionVerifyCode))
                 {
@@ -62,6 +63,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
                 }
 
             } catch (IOException e) {
+                System.out.println("error");
                 e.printStackTrace();
             }
         }

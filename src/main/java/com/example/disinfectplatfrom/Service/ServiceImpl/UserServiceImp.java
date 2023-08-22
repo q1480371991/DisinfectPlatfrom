@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
@@ -92,6 +93,46 @@ public class UserServiceImp implements UserService {
     }
 
     /*
+     * @title :UpdatePassword
+     * @Author :Lin
+     * @Description : 修改账号密码
+     * @Date :22:40 2023/3/1
+     * @Param :[password]
+     * @return :void
+     **/
+    @Override
+    public void UpdatePhonenumber(String phonenumber) {
+        //获取当前用户信息
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User user = (User)authentication.getPrincipal();
+        LambdaQueryWrapper<User> lqw = new LambdaQueryWrapper<User>();
+        //直接修改当前用户的密码，不需要前端传用户id
+        user.setPhonenumber(phonenumber);
+        userMapper.updateById(user);
+    }
+
+    /*
+     * @title :UpdatePassword
+     * @Author :Lin
+     * @Description : 修改账号密码
+     * @Date :22:40 2023/3/1
+     * @Param :[password]
+     * @return :void
+     **/
+    @Override
+    public void UpdateEmail(String email) {
+        //获取当前用户信息
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User user = (User)authentication.getPrincipal();
+        LambdaQueryWrapper<User> lqw = new LambdaQueryWrapper<User>();
+        //直接修改当前用户的密码，不需要前端传用户id
+        user.setEmail(email);
+        userMapper.updateById(user);
+    }
+
+
+
+    /*
      * @title :ListUserByProjectId
      * @Author :Lin
      * @Description : 获取项目下所有账号信息  仅项目管理员
@@ -148,6 +189,36 @@ public class UserServiceImp implements UserService {
             res.addAll(users);
         }
         return res;
+    }
+
+    /*
+     * @title :ListUsers
+     * @Author :Lin
+     * @Description : 返回项目下所有账户内容    仅项目管理员 or HW
+     * 海威顶级账号查看数据范围：所有项目的所有管理台账户内容。管理员查看数据范围：项目内所有管理台账户内容。
+     * @Date :15:56 2023/7/16
+     * @Param :[]
+     * @return :java.util.Collection<com.example.disinfectplatfrom.Pojo.User>
+     **/
+    @PreAuthorize("hasRole('PA') or hasRole('PA')")
+    @Override
+    public Collection<User> ListUsers(){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User user = (User)authentication.getPrincipal();
+        if (user.isHW()){
+            ArrayList<Integer> userids = new ArrayList<>();
+            Collection<Project> projects = this.ListAllProject();
+            for (Project project : projects) {
+                Collection<Integer> userids1 = userMapper.ListUserIdInProjectById(project.getId());
+                userids.addAll(userids1);
+            }
+            LambdaQueryWrapper<User> userlqw = new LambdaQueryWrapper<User>();
+            userlqw.in(User::getId,userids);
+            List<User> users = userMapper.selectList(userlqw);
+            return users;
+        }else{
+            return ListUserByProjectAdminId();
+        }
     }
 
     /*
@@ -215,7 +286,6 @@ public class UserServiceImp implements UserService {
     @Override
     public void AddProjectOriginAccount(Integer projectid,User user){
         if (!ObjectUtils.isEmpty(user)){
-
             //插入user
             userMapper.insert(user);
             //个体user分配项目创始人的权限or角色
@@ -266,6 +336,7 @@ public class UserServiceImp implements UserService {
         lqw.eq(Project::getProjectId,projectid);
         Project project = projectMapper.selectOne(lqw);
         project.setAdminId(adminid);
+
         projectMapper.updateById(project);
     }
 
@@ -307,13 +378,14 @@ public class UserServiceImp implements UserService {
     /*
      * @title :SelectUser
      * @Author :Lin
-     * @Description : 模糊查询用户
+     * @Description : 模糊查询用户   仅限拥有高级设置权限  待改
      * @Date :16:55 2023/3/7
      * @Param :[s, projectid]
      * @return :void
      **/
+    @PreAuthorize("hasAuthority('advanced_setting')")
     @Override
-    public Collection<User> SelectUser(String s, Integer projectid,Integer status,String email,String phonenumber) {
+    public Collection<User> SelectUser(String username, Integer projectid,Integer status,String email,String phonenumber) {
         LambdaQueryWrapper<User> lqw = new LambdaQueryWrapper<User>();
         if(!ObjectUtils.isEmpty(status)){
             lqw.eq(User::getStatus,status);}
@@ -327,8 +399,8 @@ public class UserServiceImp implements UserService {
             Collection<Integer> userid = userMapper.ListUserIdInProjectById(projectid);
             lqw.in(User::getId,userid);
         }
-        if(!ObjectUtils.isEmpty(s)) {
-            lqw.like(User::getName, s);
+        if(!ObjectUtils.isEmpty(username)) {
+            lqw.like(User::getName, username);
         }
         List<User> users = userMapper.selectList(lqw);
         return users;
@@ -337,31 +409,34 @@ public class UserServiceImp implements UserService {
     /*
      * @title :AddProjectUser
      * @Author :Lin
-     * @Description : 添加项目用户，仅限项目管理员
+     * @Description : 添加项目用户，仅限项目管理员   待改， roleid不知道是数组int还是单个int：
      * @Date :23:05 2023/3/6
      * @Param :[user]
      * @return :void
      **/
     @PreAuthorize("hasRole('PA')")
     @Override
-    public void AddProjectUser(User user,Integer projectid,Integer roleid){
+    public void AddProjectUser(User user,Integer projectid,ArrayList<Integer> roleids){
         //先查询该项目下该角色的信息
-        Project_Role project_role = projectMapper.SelectProject_Role(projectid, roleid);
-        //判断
-        if (project_role.getCurrentAccount()<project_role.getMaxAccount()){
-            //当前角色的数量小于最大数量，添加用户
-            userMapper.insert(user);
-            //将用户与项目关联
-            projectMapper.AddProject_User(projectid,user.getId());
-            //用户的角色
-            userMapper.AddUser_Role(user.getId(),roleid);
-            //更新该项目中该角色对应的current_account
-            project_role.setCurrentAccount(project_role.getCurrentAccount()+1);
-            projectMapper.UpdateProjectRoleAccount(project_role.getCurrentAccount(),project_role.getProjectId(),project_role.getRoleId());
-        }else {
-            //抛出异常
-            throw new RuntimeException("当前角色数量已满");
+        for (Integer roleid : roleids) {
+            Project_Role project_role = projectMapper.SelectProject_Role(projectid, roleid);
+            //判断
+            if (project_role.getCurrentAccount()<project_role.getMaxAccount()){
+                //当前角色的数量小于最大数量，添加用户
+                userMapper.insert(user);
+                //将用户与项目关联
+                projectMapper.AddProject_User(projectid,user.getId());
+                //用户的角色
+                userMapper.AddUser_Role(user.getId(),roleid);
+                //更新该项目中该角色对应的current_account
+                project_role.setCurrentAccount(project_role.getCurrentAccount()+1);
+                projectMapper.UpdateProjectRoleAccount(project_role.getCurrentAccount(),project_role.getProjectId(),project_role.getRoleId());
+            }else {
+                //抛出异常
+                throw new RuntimeException("当前角色role"+roleid+"数量已满");
+            }
         }
+
     }
 
     /*
@@ -438,11 +513,12 @@ public class UserServiceImp implements UserService {
     /*
      * @title :CheckProjectName
      * @Author :Lin
-     * @Description : 检测用户账户名是否重复
+     * @Description : 检测用户账户名是否重复    仅项目管理员
      * @Date :21:34 2023/3/7
      * @Param :[projectname]
      * @return :boolean
      **/
+    @PreAuthorize("hasRole('ROLE_PA')")
     @Override
     public boolean CheckUserName(String username) {
         LambdaQueryWrapper<User> lqw = new LambdaQueryWrapper<User>();

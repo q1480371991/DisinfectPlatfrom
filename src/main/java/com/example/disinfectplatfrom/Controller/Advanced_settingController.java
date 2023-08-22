@@ -1,20 +1,19 @@
 package com.example.disinfectplatfrom.Controller;
-
 import com.example.disinfectplatfrom.Pojo.Project;
 import com.example.disinfectplatfrom.Pojo.Role;
+import com.example.disinfectplatfrom.Pojo.User;
 import com.example.disinfectplatfrom.Service.ProjectService;
 import com.example.disinfectplatfrom.Service.UserService;
 import com.example.disinfectplatfrom.Utils.R;
-import javafx.geometry.Pos;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.stereotype.Controller;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -47,7 +46,7 @@ public class Advanced_settingController {
      * @Param :[]
      * @return :com.example.disinfectplatfrom.Utils.R
      **/
-    @RequestMapping("/ListAllProject")
+    @RequestMapping(value = "/ListAllProject",method = RequestMethod.GET)
     public R ListAllProject(){
         Collection<Project> projects = userService.ListAllProject();
         return R.ok(projects);
@@ -95,7 +94,7 @@ public class Advanced_settingController {
      * @return :com.example.disinfectplatfrom.Utils.R
      **/
     @RequestMapping(value = "/DeleteProject",method = RequestMethod.POST)
-    public R DeleteProject(@RequestBody Map<String, Object> data){
+    public R DeleteProject(@RequestBody Map<String, Object> data) throws Exception {
         if (!ObjectUtils.isEmpty(data)){
             projectService.DeleteProjectById((Integer) data.get("projectid"), (String) data.get("password"));
         }
@@ -152,23 +151,122 @@ public class Advanced_settingController {
     /*
      * @title :AddRole
      * @Author :Lin
-     * @Description :  添加一个项目下的角色   仅限拥有角色管理权限的账户    未解决前后端参数传递的问题
+     * @Description :  添加一个项目下的角色   仅限拥有角色管理权限的账户    已解决前后端参数传递的问题
      * @Date :17:52 2023/7/15
      * @Param :[role, projectid, authorities, quantity, orgnizationids]
      * @return :com.example.disinfectplatfrom.Utils.R
      **/
     @RequestMapping(value = "/AddRole",method = RequestMethod.POST)
-    public R AddRole(Role role, Integer projectid,
-                     List<Integer> authorities,Integer quantity,
-                     List<Integer> orgnizationids){
-        if (!ObjectUtils.isEmpty(role) &&!ObjectUtils.isEmpty(projectid)
-                &&!ObjectUtils.isEmpty(authorities)&&!ObjectUtils.isEmpty(quantity)
-                &&!ObjectUtils.isEmpty(orgnizationids)){
+    public R AddRole(@RequestBody String data) throws JsonProcessingException {
+        if (!ObjectUtils.isEmpty(data)){
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode jsonNode = mapper.readTree(data);
+            Role role = mapper.convertValue(jsonNode.get("role"), Role.class);
+            int projectid = jsonNode.get("projectid").asInt();
+            ArrayList<Integer> authorities = mapper.convertValue(jsonNode.get("authorities"), ArrayList.class);
+            int quantity = jsonNode.get("quantity").asInt();
+            ArrayList<Integer> orgnizationids = mapper.convertValue(jsonNode.get("orgnizationids"), ArrayList.class);
             userService.AddRole(role,projectid,authorities,quantity,orgnizationids);
+            return R.ok(null);
         }
-        return R.ok(null);
+
+        return R.fail(null);
     }
+
     //账号管理
+
+    /*
+     * @title :SelectUser
+     * @Author :Lin
+     * @Description : 模糊查询用户 仅限拥有高级设置权限
+     *
+     * @Date :20:24 2023/7/15
+     * @Param :[data]
+     * @return :com.example.disinfectplatfrom.Utils.R
+     **/
+    @RequestMapping(value = "/SelectUser",method = RequestMethod.POST)
+    public R SelectUser(@RequestBody Map<String, Object> data){
+        if (!ObjectUtils.isEmpty(data)){
+            Collection<User> users = userService.SelectUser((String) data.get("username"), (Integer) data.get("projectid"),
+                    (Integer) data.get("status"), (String) data.get("email"), (String) data.get("phonenumber"));
+            return R.ok(users);
+        }
+        return R.fail(null);
+    }
+
+    /*
+     * @title :ListUsers
+     * @Author :Lin
+     * @Description : 查询项目下的账户信息
+     * 海威顶级账号查看数据范围：所有项目的所有管理台账户内容。管理员查看数据范围：项目内所有管理台账户内容。
+     * @Date :20:27 2023/7/15
+     * @Param :[]
+     * @return :com.example.disinfectplatfrom.Utils.R
+     **/
+    @RequestMapping(value = "/ListUsers",method = RequestMethod.POST)
+    public R ListUsers(){
+        Collection<User> users = userService.ListUsers();
+        if (!ObjectUtils.isEmpty(users)){
+            return R.ok(users);
+        }
+        return R.fail(null);
+    }
+
+    /*
+     * @title :ListRoles
+     * @Author :Lin
+     * @Description : 查询项目下有什么角色信息    仅限拥有角色管理权限的账户
+     * @Date :16:45 2023/7/16
+     * @Param :[projectid]
+     * @return :com.example.disinfectplatfrom.Utils.R
+     **/
+    @RequestMapping(value = "/ListRoles",method = RequestMethod.GET)
+    public R ListRoles(@RequestParam("projectid") Integer projectid){
+        if (!ObjectUtils.isEmpty(projectid)){
+            return R.ok(userService.ListRolesByProjectId(projectid));
+        }
+        return R.fail(null);
+    }
+
+    /*
+     * @title :CheckUserName
+     * @Author :Lin
+     * @Description : 检测用户账户名是否重复    仅项目管理员
+     * @Date :16:50 2023/7/16
+     * @Param :[username]
+     * @return :com.example.disinfectplatfrom.Utils.R
+     **/
+    @RequestMapping(value="/CheckUserName",method = RequestMethod.GET)
+    public R CheckUserName(@RequestParam("username")String username){
+        if (!ObjectUtils.isEmpty(username)){
+            return R.ok(userService.CheckUserName(username));
+        }
+        return R.fail(null);
+    }
+
+
+    /*
+     * @title :AddProjectUser
+     * @Author :Lin
+     * @Description : 添加项目用户，仅限项目管理员   已解决前后端传参的问题
+     * @Date :16:54 2023/7/16
+     * @Param :[data]
+     * @return :com.example.disinfectplatfrom.Utils.R
+     **/
+    @RequestMapping(value = "/AddProjectUser",method = RequestMethod.POST)
+    public R AddProjectUser(@RequestBody String data) throws JsonProcessingException {
+        if (!ObjectUtils.isEmpty(data)){
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode jsonNode = mapper.readTree(data);
+            User user = mapper.convertValue(jsonNode.get("user"), User.class);
+            int projectid = jsonNode.get("roleid").asInt();
+            ArrayList<Integer> roleids = mapper.convertValue(jsonNode.get("roleid"), ArrayList.class);
+            userService.AddProjectUser(user,projectid,roleids);
+        }
+        return R.fail(null);
+    }
+
+    //系统设置  账号设置
 
 
 

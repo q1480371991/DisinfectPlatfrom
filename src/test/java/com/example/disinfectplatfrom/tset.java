@@ -10,6 +10,10 @@ import com.example.disinfectplatfrom.Service.UserService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
@@ -36,12 +40,17 @@ public class tset {
     @Autowired
     OrgnizationMapper orgnizationMapper;
     @Test
-    public void test1(){
+    public void test1(@AuthenticationPrincipal User user){
 //        Role role = new Role(null, "q", "0", 0, "2023-07-14 21:20:09", "2023-07-14 21:20:09");
 //        int insert = roleMapper.insert(role);
 //        System.out.println(role.getId());
 
-        Collection<Orgnization> orgnizations = orgnizationMapper.SelectOrgnization("组织", "");
-        System.out.println(orgnizations);
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
+        System.out.println(user);
+        User currentUser = (User)authentication.getPrincipal();
+        System.out.println(currentUser);
+        System.out.println(authentication);
+        System.out.println(currentUser.getAuthorities());
     }
 }

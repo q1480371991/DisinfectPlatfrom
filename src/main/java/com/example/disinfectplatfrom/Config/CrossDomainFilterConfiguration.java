@@ -10,13 +10,14 @@ import org.springframework.context.annotation.Configuration;
 
 import java.util.Arrays;
 //解决springboot-vue前后端分离项目跨域session不一致的问题
-@Configuration
+//@Configuration
 public class CrossDomainFilterConfiguration {
     @Autowired
-    CrossDomainFilter loginFilter;
+    CrossDomainFilter crossDomainFilter;
+
     @Bean
     public RegistrationBean myFilter() {
-        FilterRegistrationBean filterRegistrationBean = new FilterRegistrationBean(loginFilter);
+        FilterRegistrationBean filterRegistrationBean = new FilterRegistrationBean(crossDomainFilter);
         filterRegistrationBean.setUrlPatterns(Arrays.asList("/*"));
         return filterRegistrationBean;
     }

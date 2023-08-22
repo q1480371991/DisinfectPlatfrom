@@ -34,7 +34,10 @@ public class ProjectServiceImp implements ProjectService {
      * @return :void
      **/
     @Override
-    public void DeleteProjectById(Integer projectid,String password) {
+    public void DeleteProjectById(Integer projectid,String password) throws Exception {
+        //      无法移除项目限制：
+        //1.	项目内的组织包含已绑定的网关
+        //2.	项目内的组织有绑定的小程序用户
         Collection<User> users = userService.ListUserByProjectId(projectid,1);
         String mypassword="特殊密码";
         //当一个项目没有除项目管理员和项目创始人账号时才能删除
@@ -43,6 +46,8 @@ public class ProjectServiceImp implements ProjectService {
             //逻辑删除
             project.setDelFlag(1);
             projectMapper.updateById(project);
+        }else{
+            throw new Exception("无法删除");
         }
     }
 
@@ -60,7 +65,7 @@ public class ProjectServiceImp implements ProjectService {
         lqw.eq(Project::getDelFlag,0);//查没有被逻辑删除的项目
         lqw.eq(Project::getProjectId,projectid);
         Project project = projectMapper.selectOne(lqw);
-        if(!ObjectUtils.isEmpty(project)) {
+        if(ObjectUtils.isEmpty(project)) {
             return true;
         }
         else {
@@ -92,7 +97,7 @@ public class ProjectServiceImp implements ProjectService {
         lqw.eq(Project::getDelFlag,0);//查没有被逻辑删除的项目
         lqw.eq(Project::getProjectName,projectname);
         Project project = projectMapper.selectOne(lqw);
-        if(!ObjectUtils.isEmpty(project)) {
+        if(ObjectUtils.isEmpty(project)) {
             return true;
         }
         else {

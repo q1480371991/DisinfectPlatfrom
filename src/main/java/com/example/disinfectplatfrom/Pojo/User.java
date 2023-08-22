@@ -1,9 +1,6 @@
 package com.example.disinfectplatfrom.Pojo;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.SqlCondition;
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -24,6 +21,7 @@ import java.util.Collection;
  * @updateRemark : 描述说明本次修改内容
  */
 @Data
+//@TableName(value = "user")
 public class User implements UserDetails {
     @TableId(value = "id", type = IdType.AUTO)
     private Integer id;
@@ -112,5 +110,15 @@ public class User implements UserDetails {
     @Override
     public boolean isEnabled() {
         return true;
+    }
+
+    public Boolean isHW(){
+        String hw="ROLE_HW";
+        for (String role : this.roles) {
+            if (hw.equals(role)){
+                return true;
+            }
+        }
+        return false;
     }
 }

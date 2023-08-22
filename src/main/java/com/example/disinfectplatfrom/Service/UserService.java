@@ -1,6 +1,7 @@
 package com.example.disinfectplatfrom.Service;
 
 import com.example.disinfectplatfrom.Pojo.*;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.parameters.P;
 
 import java.util.ArrayList;
@@ -16,11 +17,20 @@ public interface UserService {
     //修改密码
     public void UpdatePassword(String password);//通过id修改用户密码
 
+    //修改手机号
+    public void UpdatePhonenumber(String phonenumber);//通过id修改手机号
+    //修改邮箱
+    public void UpdateEmail(String email);//通过id修改邮箱
+
     //返回项目下所有账户内容  仅项目管理员
     public Collection<User> ListUserByProjectId(Integer projectid,Integer flag);
 
     //返回项目管理员所管理的项目下所有账户内容    仅项目管理员
     public Collection<User> ListUserByProjectAdminId();
+
+    //返回项目下所有账户内容    仅项目管理员 or HW
+    //海威顶级账号查看数据范围：所有项目的所有管理台账户内容。管理员查看数据范围：项目内所有管理台账户内容。
+    public Collection<User> ListUsers();
 
 
     //返回所有项目的信息，仅海威账号
@@ -50,7 +60,7 @@ public interface UserService {
     public void AddSmallRoutineUser(User user,Integer orgnizationid);
 
     //添加项目用户，仅限项目管理员
-    public void AddProjectUser(User user,Integer projectid,Integer roleid);
+    public void AddProjectUser(User user,Integer projectid,ArrayList<Integer> roleids);
 
     //添加组织 仅项目管理员
     public void AddOrganization(Orgnization orgnization);
@@ -62,7 +72,7 @@ public interface UserService {
     public ArrayList<Orgnization> ListOrgnizationByProjectid(Integer projectid);
 
     //查询用户
-    public Collection<User> SelectUser(String s, Integer projectid,Integer status,String email,String phonenumber);
+    public Collection<User> SelectUser(String username, Integer projectid,Integer status,String email,String phonenumber);
 
 
 

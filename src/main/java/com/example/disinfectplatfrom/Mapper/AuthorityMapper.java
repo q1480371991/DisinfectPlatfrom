@@ -15,8 +15,12 @@ import java.util.Collection;
 public interface AuthorityMapper extends BaseMapper<Authority> {
     @Select("SELECT * FROM menu WHERE id IN (SELECT menu_id FROM role_menu WHERE role_id IN (SELECT id FROM role WHERE id IN (SELECT role_id FROM user_role WHERE user_id = #{userid})))")
     public Collection<Authority> ListAuthoritiesByUserId(int userid);
+
+
     @Insert("INSERT role_menu VALUES(NULL ,#{roleid},#{menuid})")
     public void AddRole_Menu(Integer roleid,Integer menuid);
+
+
     @Select("SELECT * FROM menu WHERE id IN (SELECT menu_id FROM role_menu WHERE role_id=#{roleid} )")
     public Collection<Authority> ListAuthoritiesByRoleId(int roleid);
 }
