@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.imageio.ImageIO;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -34,8 +35,9 @@ public class VerfyCodeController {
     }
 
     @GetMapping("/vc.jpg")
-    public R getVerifyCode(HttpSession session) throws IOException {
-        System.out.println(session.getId());
+    public R getVerifyCode(HttpServletRequest request) throws IOException {
+        HttpSession session = request.getSession();
+        System.out.println("vc sessionid:"+session.getId());
         //1.生成验证码
         String text=producer.createText();
         System.out.println("验证码"+text);

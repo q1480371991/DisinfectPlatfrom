@@ -35,11 +35,13 @@ public class MyPersistentTokenBasedRemeberMeServiceImpl extends PersistentTokenB
     @Override
     protected boolean rememberMeRequested(HttpServletRequest request, String parameter) {
         Object attribute = request.getAttribute(parameter);
+
         if(!ObjectUtils.isEmpty(attribute)){
             String paramValue = attribute.toString();
             if (!ObjectUtils.isEmpty(paramValue)) {
                 if (paramValue.equalsIgnoreCase("true") || paramValue.equalsIgnoreCase("on")
                         || paramValue.equalsIgnoreCase("yes") || paramValue.equals("1")) {
+                    System.out.println("remeberme success");
                     return true;
                 }
             }

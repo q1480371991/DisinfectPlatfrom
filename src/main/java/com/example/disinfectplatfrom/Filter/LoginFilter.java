@@ -43,16 +43,29 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
             //3.从 json 数据中获取用户输入用户名、密码及验证码进行认证 {"uername":"xxx","password":"xxx","kaptcha":"xxx","remeber-me":"xxx"}
             try {
                 Map<String, String> userInfo = new ObjectMapper().readValue(request.getInputStream(), Map.class);
-                String kaptcha= userInfo.get(getKaptchaParameter());
-                String username = userInfo.get(getUsernameParameter());
-                String password = userInfo.get(getPasswordParameter());
-                String remembermeValue = userInfo.get(AbstractRememberMeServices.DEFAULT_PARAMETER);
+                System.out.println(userInfo);
+                String data = userInfo.get("data");
+                Map<String, Object> Info=new ObjectMapper().readValue(data, Map.class);
+                System.out.println(Info);
+                String kaptchaParameter = getKaptchaParameter();
+                String usernameParameter = getUsernameParameter();
+                String passwordParameter = getPasswordParameter();
+                String kaptcha= (String) Info.get(kaptchaParameter);
+                String username = (String)Info.get(usernameParameter);
+                String password = (String)Info.get(passwordParameter);
+                boolean remembermeValue = (boolean)Info.get(AbstractRememberMeServices.DEFAULT_PARAMETER);
+                System.out.println(remembermeValue);
                 if(!ObjectUtils.isEmpty(remembermeValue)){
-                    request.setAttribute(AbstractRememberMeServices.DEFAULT_PARAMETER,remembermeValue);
+                    if (remembermeValue){
+                        request.setAttribute(AbstractRememberMeServices.DEFAULT_PARAMETER,"true");
+                    }else {
+                        request.setAttribute(AbstractRememberMeServices.DEFAULT_PARAMETER,"false");
+                    }
+
                 }
                 System.out.println("用户名: " + username + " 密码: " + password+" 验证码："+kaptcha+" remember-me："+remembermeValue);
                 //获取session中的验证码
-                System.out.println(request.getSession().getId());
+                System.out.println("login sessionid:"+request.getSession().getId());
                 String sessionVerifyCode =(String) request.getSession().getAttribute(getKaptchaParameter());
                 if(!ObjectUtils.isEmpty(kaptcha)&&!ObjectUtils.isEmpty(sessionVerifyCode)&&kaptcha.equalsIgnoreCase(sessionVerifyCode))
                 {

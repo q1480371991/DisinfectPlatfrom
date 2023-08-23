@@ -81,6 +81,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .mvcMatchers("/vc.jpg").permitAll()
                 .mvcMatchers("/test").permitAll()
                 .mvcMatchers("/test1").permitAll()
+                .mvcMatchers("/doLogin").permitAll()
                 .anyRequest().authenticated()//所有请求必须认证
                 .and().formLogin()
                 .and()
@@ -103,20 +104,20 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 //                .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
                 .disable()
 //                .and()
-                .sessionManagement()//开启会话管理
-
-                .maximumSessions(1)//单点登录未测试
-                .maxSessionsPreventsLogin(true)
-                .expiredSessionStrategy((event -> {
-                    HttpServletResponse response = event.getResponse();
-                    Map<String, Object> res = new HashMap<>();
-                    res.put("status",500);
-                    res.put("msg","当前会话已经失效,请重新登录！");
-                    String s = new ObjectMapper().writeValueAsString(res);
-                    response.setContentType("application/json;charset=UTF-8");
-                    response.getWriter().println(s);
-                    response.flushBuffer();
-                }))
+//                .sessionManagement()//开启会话管理
+//
+//                .maximumSessions(1)//单点登录未测试
+//                .maxSessionsPreventsLogin(true)
+//                .expiredSessionStrategy((event -> {
+//                    HttpServletResponse response = event.getResponse();
+//                    Map<String, Object> res = new HashMap<>();
+//                    res.put("status",500);
+//                    res.put("msg","当前会话已经失效,请重新登录！");
+//                    String s = new ObjectMapper().writeValueAsString(res);
+//                    response.setContentType("application/json;charset=UTF-8");
+//                    response.getWriter().println(s);
+//                    response.flushBuffer();
+//                }))
 //                .maxSessionsPreventsLogin(true)一旦登录，禁止再次登录
                 ;//
 
@@ -124,18 +125,33 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     }
     //springsecurity跨域处理方案
     @Bean
-    public CorsConfigurationSource corsConfiguration(){
+    CorsConfigurationSource corsConfiguration(){
+
         CorsConfiguration corsConfiguration = new CorsConfiguration();
         corsConfiguration.setAllowedHeaders(Arrays.asList("*"));
         corsConfiguration.setAllowedMethods(Arrays.asList("*"));
-        corsConfiguration.setAllowedOrigins(Arrays.asList("*"));
+        corsConfiguration.setAllowedOrigins(Arrays.asList("http://localhost:5173"));
+        corsConfiguration.setAllowCredentials(true);
         corsConfiguration.setMaxAge(3600L);
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**",corsConfiguration);
         return source;
 
     }
-    //监听会话
+//    @Bean
+//    public CorsConfigurationSource corsConfiguration() {
+//        CorsConfiguration configuration = new CorsConfiguration();
+//        configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173")); // 允许的源
+//        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS")); // 允许的HTTP方法
+//        configuration.setAllowedHeaders(Arrays.asList("*")); // 允许的请求头
+//        configuration.setAllowCredentials(true); // 允许携带凭据
+//
+//        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+//        source.registerCorsConfiguration("/**", configuration);
+//
+//        return source;
+//    }
+//    //监听会话
     @Bean
     public HttpSessionEventPublisher httpSessionEventPublisher(){
         return new HttpSessionEventPublisher();
