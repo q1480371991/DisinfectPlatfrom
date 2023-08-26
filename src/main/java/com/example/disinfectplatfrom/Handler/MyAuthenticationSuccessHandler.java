@@ -2,6 +2,7 @@ package com.example.disinfectplatfrom.Handler;
 
 import com.example.disinfectplatfrom.Pojo.User;
 import com.example.disinfectplatfrom.Utils.R;
+import com.example.disinfectplatfrom.Utils.code;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
@@ -31,7 +32,7 @@ public class MyAuthenticationSuccessHandler implements AuthenticationSuccessHand
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
         R r = new R();
-        r.setCode(HttpStatus.OK.value());
+        r.setCode(code.LOGIN_OK);
         r.setMsg("登录成功");
 
         User user =(User) authentication.getPrincipal();

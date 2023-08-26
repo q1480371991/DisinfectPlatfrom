@@ -272,7 +272,6 @@ public class UserServiceImp implements UserService {
     public Boolean AddProject(Project project) {
         int insert = projectMapper.insert(project);
         return insert==1;
-
     }
     /*
      * @title :AddProjectOriginAccount
@@ -288,6 +287,7 @@ public class UserServiceImp implements UserService {
         if (!ObjectUtils.isEmpty(user)){
             //插入user
             userMapper.insert(user);
+            System.out.println(user);
             //个体user分配项目创始人的权限or角色
             projectMapper.AddProject_User(projectid,user.getId());
             userMapper.AddUser_Role(user.getId(),6);

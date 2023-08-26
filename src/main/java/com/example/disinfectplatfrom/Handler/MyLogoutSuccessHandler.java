@@ -1,6 +1,7 @@
 package com.example.disinfectplatfrom.Handler;
 
 import com.example.disinfectplatfrom.Utils.R;
+import com.example.disinfectplatfrom.Utils.code;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
@@ -29,7 +30,8 @@ public class MyLogoutSuccessHandler implements LogoutSuccessHandler {
     @Override
     public void onLogoutSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
         R r = new R();
-        r.setCode(HttpStatus.OK.value());
+        System.out.println("注销成功");
+        r.setCode(code.LOGOUT_OK);
         r.setData(authentication.getPrincipal());
         r.setMsg("注销成功");
         response.setStatus(HttpStatus.OK.value());

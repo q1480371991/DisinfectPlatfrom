@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.sql.Timestamp;
 
@@ -20,6 +21,7 @@ import java.sql.Timestamp;
  */
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
 public class Project {
     @TableId(value = "id", type = IdType.AUTO)
     private Integer id;
@@ -32,4 +34,10 @@ public class Project {
     private String remark;
     private int originAccountId;
     private int delFlag;
+
+    public Project(Integer projectId, String projectName, String remark) {
+        this.projectId = projectId;
+        this.projectName = projectName;
+        this.remark = remark;
+    }
 }

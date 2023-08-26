@@ -31,7 +31,17 @@ public class TestController {
     UserService userService;
     @RequestMapping(value = "test")
 //    @PreAuthorize("hasAuthority('data_analysis')")
-    public R test(HttpServletRequest request) throws IOException {
+    public R test(@RequestBody Map<String,Object> data) throws IOException {
+        System.out.println(data);
+        Object user = data.get("user");
+        System.out.println(user.getClass());
+        System.out.println(user);
+        ObjectMapper mapper = new ObjectMapper();
+        User user1 = mapper.convertValue(user, User.class);
+        System.out.println(user1);
+        System.out.println(user1.getClass());
+
+
         return new R("true");
     }
 //    @PreAuthorize("hasRole('HW')")

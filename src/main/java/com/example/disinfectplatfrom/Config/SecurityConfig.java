@@ -93,7 +93,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 //                .tokenRepository(persistentTokenRepository())
                 .and()
                 .cors()//跨域处理方案
-                .configurationSource(corsConfiguration())//跨域未测试
+                .configurationSource(corsConfiguration())
 //                处理未认证、权限不足
                 .and()
                 .exceptionHandling()
@@ -103,26 +103,29 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .csrf()
 //                .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
                 .disable()
-//                .and()
-//                .sessionManagement()//开启会话管理
-//
-//                .maximumSessions(1)//单点登录未测试
-//                .maxSessionsPreventsLogin(true)
-//                .expiredSessionStrategy((event -> {
-//                    HttpServletResponse response = event.getResponse();
-//                    Map<String, Object> res = new HashMap<>();
-//                    res.put("status",500);
-//                    res.put("msg","当前会话已经失效,请重新登录！");
-//                    String s = new ObjectMapper().writeValueAsString(res);
-//                    response.setContentType("application/json;charset=UTF-8");
-//                    response.getWriter().println(s);
-//                    response.flushBuffer();
-//                }))
-//                .maxSessionsPreventsLogin(true)一旦登录，禁止再次登录
-                ;//
+
+                .sessionManagement()//开启会话管理
+
+                .maximumSessions(1)//单点登录未测试
+                .maxSessionsPreventsLogin(true)
+                .expiredSessionStrategy((event -> {
+                    System.out.println("单点登录");
+                    HttpServletResponse response = event.getResponse();
+                    Map<String, Object> res = new HashMap<>();
+                    res.put("status",500);
+                    res.put("msg","当前会话已经失效,请重新登录！");
+                    String s = new ObjectMapper().writeValueAsString(res);
+                    response.setContentType("application/json;charset=UTF-8");
+                    response.getWriter().println(s);
+                    response.flushBuffer();
+                }))
+
+                ;
 
         http.addFilterAt(loginFilter(), UsernamePasswordAuthenticationFilter.class);
     }
+
+
     //springsecurity跨域处理方案
     @Bean
     CorsConfigurationSource corsConfiguration(){

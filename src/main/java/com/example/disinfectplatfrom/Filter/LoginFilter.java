@@ -42,19 +42,19 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         if (request.getContentType().equalsIgnoreCase(MediaType.APPLICATION_JSON_VALUE)) {
             //3.从 json 数据中获取用户输入用户名、密码及验证码进行认证 {"uername":"xxx","password":"xxx","kaptcha":"xxx","remeber-me":"xxx"}
             try {
-                Map<String, String> userInfo = new ObjectMapper().readValue(request.getInputStream(), Map.class);
+                Map<String, Object> userInfo = new ObjectMapper().readValue(request.getInputStream(), Map.class);
                 System.out.println(userInfo);
-                String data = userInfo.get("data");
-                Map<String, Object> Info=new ObjectMapper().readValue(data, Map.class);
-                System.out.println(Info);
+//                String data = userInfo.get("data");
+//                Map<String, Object> Info=new ObjectMapper().readValue(data, Map.class);
+//                System.out.println(Info);
                 String kaptchaParameter = getKaptchaParameter();
                 String usernameParameter = getUsernameParameter();
                 String passwordParameter = getPasswordParameter();
-                String kaptcha= (String) Info.get(kaptchaParameter);
-                String username = (String)Info.get(usernameParameter);
-                String password = (String)Info.get(passwordParameter);
-                boolean remembermeValue = (boolean)Info.get(AbstractRememberMeServices.DEFAULT_PARAMETER);
-                System.out.println(remembermeValue);
+                String kaptcha= (String) userInfo.get(kaptchaParameter);
+                String username = (String)userInfo.get(usernameParameter);
+                String password = (String)userInfo.get(passwordParameter);
+                boolean remembermeValue = (boolean)userInfo.get(AbstractRememberMeServices.DEFAULT_PARAMETER);
+
                 if(!ObjectUtils.isEmpty(remembermeValue)){
                     if (remembermeValue){
                         request.setAttribute(AbstractRememberMeServices.DEFAULT_PARAMETER,"true");

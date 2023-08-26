@@ -1,8 +1,11 @@
 package com.example.disinfectplatfrom.Handler;
 
 import com.example.disinfectplatfrom.Utils.R;
+import com.example.disinfectplatfrom.Utils.code;
+import com.example.disinfectplatfrom.exception.KaptchaNotMatchException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.stereotype.Component;
@@ -31,9 +34,17 @@ public class MyAuthenticationFailureHandler implements AuthenticationFailureHand
     @Override
     public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException, ServletException {
         R r = new R();
-        r.setMsg("登录失败"+exception.getMessage());
-        r.setCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
-        response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+        //        KaptchaNotMatchException  BadCredentialsException
+        if (exception instanceof BadCredentialsException){
+            //账号不存在 or 密码错误
+            r.setCode(code.LOGIN_ACERR_PWDERR);
+        }
+        if (exception instanceof KaptchaNotMatchException){
+            // 验证码错误
+            r.setCode(code.LOGIN_VCERR);
+        }
+        r.setMsg("登录失败 "+exception.getMessage());
+        response.setStatus(HttpStatus.OK.value());
         response.setContentType("application/json;charset=UTF-8");
         String s = new ObjectMapper().writeValueAsString(r);
         response.getWriter().println(s);

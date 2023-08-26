@@ -9,6 +9,10 @@ import java.util.Collection;
 
 
 public class R {
+
+
+
+
     private  Boolean flag;//响应状态
     private  String msg;//响应信息
     private Object data;//响应数据
@@ -84,6 +88,20 @@ public class R {
         R r = new R(data);
         r.setCode(201);
         r.setMsg("请求失败");
+        return r;
+    }
+
+    public static R ok(Object data,String msg){
+        R r = new R(data);
+        r.setCode(200);
+        r.setMsg(msg);
+        return r;
+    }
+
+    public static R fail(Object data,String msg){
+        R r = new R(data);
+        r.setCode(201);
+        r.setMsg(msg);
         return r;
     }
 }

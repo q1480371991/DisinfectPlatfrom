@@ -30,15 +30,16 @@ public class MyAuthenticationEntryPoint implements AuthenticationEntryPoint {
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response,
                          AuthenticationException authException) throws IOException, ServletException {
+
         response.setContentType(MediaType.APPLICATION_JSON_UTF8_VALUE);
-        response.setStatus(HttpStatus.UNAUTHORIZED.value());
+        response.setStatus(HttpStatus.OK.value());
         response.setCharacterEncoding("UTF-8");
         response.setContentType("application/json; charset=utf-8");
         PrintWriter out = response.getWriter();
         ObjectMapper objectMapper = new ObjectMapper();
         R r = new R();
         r.setMsg("请认证之后再去处理");
-        r.setCode(403);
+        r.setCode(HttpStatus.UNAUTHORIZED.value());
         String errormsg = objectMapper.writeValueAsString(r);
         out.write(errormsg);
         out.flush();

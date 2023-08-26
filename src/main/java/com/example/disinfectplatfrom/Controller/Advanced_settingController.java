@@ -12,6 +12,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.*;
+
+import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
@@ -56,16 +59,31 @@ public class Advanced_settingController {
      * @title :AddProject
      * @Author :Lin
      * @Description : 添加项目   仅限海威账号
+     * 在该接口中同时处理 添加项目和添加项目初始账户
      * @Date :16:41 2023/7/15
      * @Param :[project]
      * @return :com.example.disinfectplatfrom.Utils.R
      **/
     @RequestMapping(value = "/AddProject",method = RequestMethod.POST)
-    public R AddProject(@RequestBody Project project){
-        if(!ObjectUtils.isEmpty(project)){
+    public R AddProject(@RequestBody String data) throws JsonProcessingException {
+        if (!ObjectUtils.isEmpty(data)){
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode jsonNode = mapper.readTree(data);
+            System.out.println(jsonNode);
+            User user = mapper.convertValue(jsonNode.get("user"), User.class);
+            Project project = mapper.convertValue(jsonNode.get("project"), Project.class);
+            project.setCreatTime(new Timestamp(System.currentTimeMillis()));
+            System.out.println(project);
+            System.out.println(user);
+
+
             userService.AddProject(project);
+            userService.AddProjectOriginAccount(project.getProjectId(),user);
+
+            return R.ok(null);
         }
-        return R.ok(null);
+
+        return R.fail(null);
     }
 
     /*
@@ -96,7 +114,12 @@ public class Advanced_settingController {
     @RequestMapping(value = "/DeleteProject",method = RequestMethod.POST)
     public R DeleteProject(@RequestBody Map<String, Object> data) throws Exception {
         if (!ObjectUtils.isEmpty(data)){
-            projectService.DeleteProjectById((Integer) data.get("projectid"), (String) data.get("password"));
+            try{
+                projectService.DeleteProjectById((Integer) data.get("projectid"), (String) data.get("password"));
+            }catch (Exception e){
+                System.out.println(e);
+                return R.fail("无法删除");
+            }
         }
         return R.ok(null);
     }
@@ -126,6 +149,30 @@ public class Advanced_settingController {
     @RequestMapping(value = "/CheckProjectName",method = RequestMethod.GET)
     public R CheckProjectName (@RequestParam("projectname") String projectname){
         return R.ok(projectService.CheckProjectName(projectname));
+    }
+
+    /*
+     * @title :AddProjectOriginAccount
+     * @Author :Lin
+     * @Description : 添加项目初始账户  仅限项目管理员
+     * @Date :19:46 2023/8/25
+     * @Param :[data]
+     * @return :com.example.disinfectplatfrom.Utils.R
+     **/
+    @RequestMapping(value = "/AddProjectOriginAccount",method = RequestMethod.POST)
+    public R AddProjectOriginAccount (@RequestBody String data) throws JsonProcessingException {
+        if (!ObjectUtils.isEmpty(data)){
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode jsonNode = mapper.readTree(data);
+            User user = mapper.convertValue(jsonNode.get("user"), User.class);
+            int projectid = jsonNode.get("projectid").asInt();
+            System.out.println(user);
+            userService.AddProjectOriginAccount(projectid,user);
+            return R.ok(null);
+        }
+        return R.fail(null);
+
+
     }
 
     //角色管理
