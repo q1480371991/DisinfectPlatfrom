@@ -134,8 +134,12 @@ public class Advanced_settingController {
      **/
     @RequestMapping(value = "/CheckProjectId",method = RequestMethod.GET)
     public R CheckProjectId(@RequestParam("projectid") Integer projectid){
-        boolean b = projectService.CheckProjectId(projectid);
-        return R.ok(b);
+        System.out.println("CheckProjectId");
+        if(!ObjectUtils.isEmpty(projectid)){
+            boolean b = projectService.CheckProjectId(projectid);
+            return R.ok(b);
+        }
+        return R.fail(null);
     }
 
     /*
@@ -148,7 +152,11 @@ public class Advanced_settingController {
      **/
     @RequestMapping(value = "/CheckProjectName",method = RequestMethod.GET)
     public R CheckProjectName (@RequestParam("projectname") String projectname){
-        return R.ok(projectService.CheckProjectName(projectname));
+
+        if(!ObjectUtils.isEmpty(projectname)){
+            return R.ok(projectService.CheckProjectName(projectname));
+        }
+        return R.fail(null);
     }
 
     /*
@@ -234,8 +242,14 @@ public class Advanced_settingController {
     @RequestMapping(value = "/SelectUser",method = RequestMethod.POST)
     public R SelectUser(@RequestBody Map<String, Object> data){
         if (!ObjectUtils.isEmpty(data)){
-            Collection<User> users = userService.SelectUser((String) data.get("username"), (Integer) data.get("projectid"),
-                    (Integer) data.get("status"), (String) data.get("email"), (String) data.get("phonenumber"));
+            System.out.println(data);
+            String username =(String) data.get("username");
+            Integer projectid = (Integer) data.get("projectid");
+            Integer status =(Integer) data.get("status")  ;
+            String email = (String) data.get("email");
+            String phonenumber = (String) data.get("phonenumber");
+            Collection<User> users = userService.SelectUser(username,projectid ,
+                  status  , email,phonenumber );
             return R.ok(users);
         }
         return R.fail(null);

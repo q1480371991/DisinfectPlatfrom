@@ -23,6 +23,7 @@ import java.util.List;
  * @updateTime : 2023/3/1 22:53
  * @updateRemark : 描述说明本次修改内容
  */
+@PreAuthorize("hasAuthority('mocha_itom') and hasAuthority('organization_management')")
 @Service
 public class OrgnizationServiceImp implements OrgnizationService {
     @Autowired
@@ -63,6 +64,7 @@ public class OrgnizationServiceImp implements OrgnizationService {
             phonenum="";
         }
         Collection<Orgnization> orgnizations = orgnizationMapper.SelectOrgnization(name, phonenum);
+
         return orgnizations;
     }
 }

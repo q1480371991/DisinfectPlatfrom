@@ -5,19 +5,15 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.example.disinfectplatfrom.Mapper.*;
 import com.example.disinfectplatfrom.Pojo.*;
 import com.example.disinfectplatfrom.Service.UserService;
-import com.sun.org.apache.bcel.internal.generic.IF_ACMPEQ;
-import com.sun.org.apache.xpath.internal.operations.Bool;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 
-import java.lang.reflect.Array;
 import java.util.*;
 
 /**
@@ -200,7 +196,7 @@ public class UserServiceImp implements UserService {
      * @Param :[]
      * @return :java.util.Collection<com.example.disinfectplatfrom.Pojo.User>
      **/
-    @PreAuthorize("hasRole('PA') or hasRole('PA')")
+    @PreAuthorize("hasRole('PA') or hasRole('HW')")
     @Override
     public Collection<User> ListUsers(){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -239,6 +235,20 @@ public class UserServiceImp implements UserService {
         Collection<Project> projects = projectMapper.selectList(lqw);
         return projects;
     }
+
+    /*
+     * @title :GetCurrentProject
+     * @Author :Lin
+     * @Description : 获取当前项目管理员所管理的项目信息  仅限项目管理员   未完成
+     * @Date :14:50 2023/8/26
+     * @Param :[]
+     * @return :com.example.disinfectplatfrom.Pojo.Project
+     **/
+    @Override
+    public Project GetCurrentProject(){
+        return null;
+    }
+
 
     /*
      * @title :ListProjectsByAdminid
@@ -400,8 +410,9 @@ public class UserServiceImp implements UserService {
             lqw.in(User::getId,userid);
         }
         if(!ObjectUtils.isEmpty(username)) {
-            lqw.like(User::getName, username);
+            lqw.like(User::getUsername, username);
         }
+
         List<User> users = userMapper.selectList(lqw);
         return users;
     }
@@ -474,7 +485,7 @@ public class UserServiceImp implements UserService {
         if (!ObjectUtils.isEmpty(orgnization))
         {
             //插入orgnization
-            orgnizationMapper.insert(orgnization);
+            int insert = orgnizationMapper.insert(orgnization);
         }
 
     }

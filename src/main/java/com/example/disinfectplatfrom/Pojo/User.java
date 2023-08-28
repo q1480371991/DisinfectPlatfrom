@@ -1,6 +1,7 @@
 package com.example.disinfectplatfrom.Pojo;
 
 import com.baomidou.mybatisplus.annotation.*;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -112,6 +113,7 @@ public class User implements UserDetails {
         return true;
     }
 
+    @JsonIgnore
     public Boolean isHW(){
         String hw="ROLE_HW";
         for (String role : this.roles) {

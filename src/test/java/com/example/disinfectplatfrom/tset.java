@@ -40,17 +40,12 @@ public class tset {
     @Autowired
     OrgnizationMapper orgnizationMapper;
     @Test
-    public void test1(@AuthenticationPrincipal User user){
+    public void test1(){
 //        Role role = new Role(null, "q", "0", 0, "2023-07-14 21:20:09", "2023-07-14 21:20:09");
 //        int insert = roleMapper.insert(role);
 //        System.out.println(role.getId());
 
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
-        System.out.println(user);
-        User currentUser = (User)authentication.getPrincipal();
-        System.out.println(currentUser);
-        System.out.println(authentication);
-        System.out.println(currentUser.getAuthorities());
+        ArrayList<Object> objects = new ArrayList<>();
+        System.out.println(objects.size());
     }
 }

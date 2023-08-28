@@ -29,7 +29,7 @@ public class MyAccessDeniedHandler implements AccessDeniedHandler {
     public void handle(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, AccessDeniedException e) throws IOException {
 
 
-        httpServletResponse.setStatus(HttpServletResponse.SC_FORBIDDEN);
+        httpServletResponse.setStatus(HttpServletResponse.SC_OK);
         httpServletResponse.setHeader("Content-Type", "application/json;charset=utf-8");
         PrintWriter out = httpServletResponse.getWriter();
         ObjectMapper objectMapper = new ObjectMapper();

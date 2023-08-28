@@ -60,6 +60,9 @@ public class Mocha_itomController {
             //查询组织下设备的数量
             Collection<Device> devices = deviceService.ListDeviceByOrignizationId(orgnization.getId());
             HashMap<String, Object> data = new HashMap<>();
+            if (ObjectUtils.isEmpty(devices)){
+                devices=new ArrayList<>();
+            }
             data.put("devicenum",devices.size());
             data.put("orgnization",orgnization);
             list.add(data);
@@ -70,7 +73,7 @@ public class Mocha_itomController {
     /*
      * @title :AddOrganization
      * @Author :Lin
-     * @Description :  返回所有组织信息  仅限项目管理员
+     * @Description :  添加组织并创建组织管理员账号  仅限项目管理员  未完成创建组织管理员账号
      * @Date :14:58 2023/7/15
      * @Param :[]
      * @return :com.example.disinfectplatfrom.Utils.R
@@ -79,9 +82,10 @@ public class Mocha_itomController {
     public R AddOrganization(@RequestBody Orgnization orgnization){
         if (!ObjectUtils.isEmpty(orgnization)){
             userService.AddOrganization(orgnization);
+            //创建组织管理员账号
+            return R.ok(null);
         }
-
-        return R.ok(null);
+        return R.fail(null);
     }
 
     /*
@@ -96,7 +100,38 @@ public class Mocha_itomController {
     public R SelectOrgnization(@RequestParam("name") String name,
                                @RequestParam("phonenum") String phonenum){
         Collection<Orgnization> orgnizations = orgnizationService.SelectOrgnization(name, phonenum);
-        return R.ok(orgnizations);
+
+        ArrayList<HashMap<String, Object>> list = new ArrayList<>();
+        for (Orgnization orgnization : orgnizations) {
+            //查询组织下设备的数量
+            Collection<Device> devices = deviceService.ListDeviceByOrignizationId(orgnization.getId());
+            HashMap<String, Object> data = new HashMap<>();
+            if (ObjectUtils.isEmpty(devices)){
+                devices=new ArrayList<>();
+            }
+            data.put("devicenum",devices.size());
+            data.put("orgnization",orgnization);
+            list.add(data);
+        }
+        return R.ok(list);
+    }
+
+    /*
+     * @title :ListUsersByOrgnizationId
+     * @Author :Lin
+     * @Description : 获取组织下的所有用户信息  仅限项目管理员
+     * @Date :18:35 2023/8/28
+     * @Param :[orgnizationid]
+     * @return :com.example.disinfectplatfrom.Utils.R
+     **/
+    @RequestMapping(value = "/ListUsersByOrgnizationId",method = RequestMethod.GET)
+    public R ListUsersByOrgnizationId(@RequestParam("orgnizationid") Integer orgnizationid){
+        if (!ObjectUtils.isEmpty(orgnizationid)){
+            Collection<User> users = userService.ListUserByOrgnizationId(orgnizationid);
+            return R.ok(users);
+        }
+
+        return R.fail(null);
     }
 
 

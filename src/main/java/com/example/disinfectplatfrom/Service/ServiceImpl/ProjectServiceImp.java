@@ -51,28 +51,16 @@ public class ProjectServiceImp implements ProjectService {
         }
     }
 
-    /*
-     * @title :CheckProjectId
-     * @Author :Lin
-     * @Description : 检查项目id是否重复,true重复，false不重复
-     * @Date :21:25 2023/3/7
-     * @Param :[projectid]
-     * @return :boolean
-     **/
-    @Override
-    public boolean CheckProjectId(Integer projectid) {
-        LambdaQueryWrapper<Project> lqw = new LambdaQueryWrapper<Project>();
-        lqw.eq(Project::getDelFlag,0);//查没有被逻辑删除的项目
-        lqw.eq(Project::getProjectId,projectid);
-        Project project = projectMapper.selectOne(lqw);
-        if(ObjectUtils.isEmpty(project)) {
-            return true;
-        }
-        else {
-            return false;
-        }
-    }
 
+
+    /*
+     * @title :ListOrgnizationByProjectid
+     * @Author :Lin
+     * @Description :  查询项目下的组织
+     * @Date :11:29 2023/8/26
+     * @Param :[projectid]
+     * @return :java.util.Collection<com.example.disinfectplatfrom.Pojo.Orgnization>
+     **/
     @Override
     public Collection<Orgnization> ListOrgnizationByProjectid(Integer projectid) {
         Collection<Integer> Orgnizationids = projectMapper.ListOrgnizationidsByProjectid(projectid);
@@ -96,6 +84,28 @@ public class ProjectServiceImp implements ProjectService {
         LambdaQueryWrapper<Project> lqw = new LambdaQueryWrapper<Project>();
         lqw.eq(Project::getDelFlag,0);//查没有被逻辑删除的项目
         lqw.eq(Project::getProjectName,projectname);
+        Project project = projectMapper.selectOne(lqw);
+        if(ObjectUtils.isEmpty(project)) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+
+    /*
+     * @title :CheckProjectId
+     * @Author :Lin
+     * @Description : 检查项目id是否重复,true重复，false不重复
+     * @Date :21:25 2023/3/7
+     * @Param :[projectid]
+     * @return :boolean
+     **/
+    @Override
+    public boolean CheckProjectId(Integer projectid) {
+        LambdaQueryWrapper<Project> lqw = new LambdaQueryWrapper<Project>();
+        lqw.eq(Project::getDelFlag,0);//查没有被逻辑删除的项目
+        lqw.eq(Project::getProjectId,projectid);
         Project project = projectMapper.selectOne(lqw);
         if(ObjectUtils.isEmpty(project)) {
             return true;

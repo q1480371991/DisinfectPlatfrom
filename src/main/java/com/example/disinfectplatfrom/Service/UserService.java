@@ -42,6 +42,8 @@ public interface UserService {
     //创建项目初始账号，仅海威账号
     public void AddProjectOriginAccount(Integer projectid,User user);
 
+    Project GetCurrentProject();
+
     //返回项目管理员下的项目信息
     public Collection<Project> ListProjectsByAdminid(Integer adminid);
 
