@@ -55,11 +55,14 @@ public interface UserService {
     //返回组织下的所有账号   仅组织管理员
     public Collection<User> ListUserByOrgnizationId(int id);
 
-    //添加组织管理员，仅限海威账号
+    //添加项目管理员，仅限海威账号
     public void AddProjectAdmin(User user);
 
     //小程序用户注册
     public void AddSmallRoutineUser(User user,Integer orgnizationid);
+
+    //添加组织管理员，仅限项目管理员
+    public void AddOrgnizationAdmin(User user, Integer orgnizationid);
 
     //添加项目用户，仅限项目管理员
     public void AddProjectUser(User user,Integer projectid,ArrayList<Integer> roleids);

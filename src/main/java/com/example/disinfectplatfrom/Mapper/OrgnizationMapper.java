@@ -13,7 +13,7 @@ import java.util.Collection;
 @Repository
 public interface OrgnizationMapper extends BaseMapper<Orgnization> {
 
-    @Insert("INSERT INTO orgnization_user VALUES(NULL,#{userid},#{projectid})")
+    @Insert("INSERT INTO orgnization_user VALUES(NULL,#{userid},#{orgnizationid})")
     public void AddOrgnization_User(Integer userid,Integer orgnizationid);
 
     @Insert("INSERT INTO orgnization_project VALUES(NULL,#{orgnizationid},#{projectid},0)")

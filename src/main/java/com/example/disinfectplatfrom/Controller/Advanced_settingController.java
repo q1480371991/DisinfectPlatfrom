@@ -71,6 +71,7 @@ public class Advanced_settingController {
             JsonNode jsonNode = mapper.readTree(data);
             System.out.println(jsonNode);
             User user = mapper.convertValue(jsonNode.get("user"), User.class);
+            user.setPassword("{noop}"+user.getPassword());
             Project project = mapper.convertValue(jsonNode.get("project"), Project.class);
             project.setCreatTime(new Timestamp(System.currentTimeMillis()));
             System.out.println(project);

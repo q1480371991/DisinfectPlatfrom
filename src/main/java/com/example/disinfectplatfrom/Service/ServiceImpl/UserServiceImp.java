@@ -380,6 +380,7 @@ public class UserServiceImp implements UserService {
     @Override
     public void AddProjectAdmin(User user) {
         //插入user
+        user.setRemark("项目管理员");
         userMapper.insert(user);
         //给user分配项目管理员的权限
         userMapper.AddUser_Role(user.getId(),3);
@@ -451,6 +452,30 @@ public class UserServiceImp implements UserService {
     }
 
     /*
+     * @title :AddOrgnizationAdmin
+     * @Author :Lin
+     * @Description :  添加组织管理员 与添加组织一并进行  仅限项目管理员
+     * @Date :15:13 2023/8/29
+     * @Param :[user, orgnizationid]
+     * @return :void
+     **/
+    @PreAuthorize("hasRole('PA')")
+    @Override
+    public void AddOrgnizationAdmin(User user, Integer orgnizationid){
+        if (!ObjectUtils.isEmpty(user) && !ObjectUtils.isEmpty(orgnizationid)){
+            //添加用户
+            user.setRemark("组织管理员");
+            userMapper.insert(user);
+            //将用户与项目关联
+            orgnizationMapper.AddOrgnization_User(user.getId(), orgnizationid);
+            //绑定角色 2:组织管理员
+            userMapper.AddUser_Role(user.getId(),2);
+        }else{
+            throw new RuntimeException("添加组织管理员失败");
+        }
+    }
+
+    /*
      * @title :ListOrgnizationByProjectid
      * @Author :Lin
      * @Description :  项目管理员查询所管理项目下的组织    仅项目管理员
@@ -516,6 +541,7 @@ public class UserServiceImp implements UserService {
      **/
     @Override
     public void AddSmallRoutineUser(User user,Integer orgnizationid) {
+        user.setRemark("小程序用户");
         userMapper.insert(user);
         orgnizationMapper.AddOrgnization_User(user.getId(),orgnizationid);
 //        projectMapper.AddProject_User();

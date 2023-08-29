@@ -1,8 +1,10 @@
 package com.example.disinfectplatfrom.Controller;
 
 import com.example.disinfectplatfrom.Pojo.Authority;
+import com.example.disinfectplatfrom.Pojo.Device;
 import com.example.disinfectplatfrom.Pojo.Role;
 import com.example.disinfectplatfrom.Pojo.User;
+import com.example.disinfectplatfrom.Service.DeviceService;
 import com.example.disinfectplatfrom.Service.UserService;
 import com.example.disinfectplatfrom.Utils.R;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -29,20 +31,17 @@ import java.util.*;
 public class TestController {
     @Autowired
     UserService userService;
+
+    @Autowired
+    DeviceService deviceService;
     @RequestMapping(value = "test")
 //    @PreAuthorize("hasAuthority('data_analysis')")
-    public R test(@RequestBody Map<String,Object> data) throws IOException {
-        System.out.println(data);
-        Object user = data.get("user");
-        System.out.println(user.getClass());
-        System.out.println(user);
-        ObjectMapper mapper = new ObjectMapper();
-        User user1 = mapper.convertValue(user, User.class);
-        System.out.println(user1);
-        System.out.println(user1.getClass());
+    public R test() throws IOException {
+        Collection<Device> devices = deviceService.ListDevice();
+        System.out.println(devices.size());
 
 
-        return new R("true");
+        return new R(devices);
     }
 //    @PreAuthorize("hasRole('HW')")
     @RequestMapping(value = "test1",method = RequestMethod.POST)

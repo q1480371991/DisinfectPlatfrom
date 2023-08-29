@@ -123,4 +123,26 @@ public class User implements UserDetails {
         }
         return false;
     }
+
+    @JsonIgnore
+    public Boolean isOA(){
+        String oa="ROLE_OA";
+        for (String role : this.roles) {
+            if (oa.equals(role)){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @JsonIgnore
+    public Boolean isPA(){
+        String pa="ROLE_PA";
+        for (String role : this.roles) {
+            if (pa.equals(role)){
+                return true;
+            }
+        }
+        return false;
+    }
 }
