@@ -19,9 +19,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author : Lin
@@ -45,6 +43,56 @@ public class DeviceServiceImpl implements DeviceService {
 
 
     /*
+     * @title :SelectDevice
+     * @Author :Lin
+     * @Description : 模糊查询设备
+     * @Date :23:05 2023/8/30
+     * @Param :[]
+     * @return :java.util.ArrayList<com.example.disinfectplatfrom.Pojo.Device>
+     **/
+    @Override
+    public ArrayList<Map<String, Object>> SelectDevice(String sn,Integer orgnizationid,Integer attribute,Integer status,String name) {
+        LambdaQueryWrapper<Device> lqw = new LambdaQueryWrapper<>();
+        ArrayList<Map<String, Object>> res = new ArrayList<>();
+        if (!ObjectUtils.isEmpty(sn)){
+            lqw.like(Device::getSN,sn);
+        }
+        if (!ObjectUtils.isEmpty(attribute)){
+            lqw.eq(Device::getAttribute,attribute);
+        }
+        if (!ObjectUtils.isEmpty(status)){
+            lqw.eq(Device::getStatus,status);
+        }
+        if (!ObjectUtils.isEmpty(name)){
+            lqw.like(Device::getDeviceName,name);
+        }
+        if (!ObjectUtils.isEmpty(orgnizationid)){
+            Collection<Device> devices = deviceMapper.ListDeviceByOrignizationId(orgnizationid);
+            ArrayList<Integer> deviceids = new ArrayList<>();
+            for (Device device : devices) {
+                deviceids.add(device.getId());
+            }
+            lqw.in(Device::getId,deviceids);
+        }
+        List<Device> devices = deviceMapper.selectList(lqw);
+        if (!ObjectUtils.isEmpty(devices)){
+            for (Device device : devices) {
+                Map<String, Object> data = new HashMap<String, Object>();
+                data.put("device",device);
+                Integer device_orgnizationid = deviceMapper.SelectOrgnizationId(device.getId());
+                Orgnization orgnization = orgnizationMapper.selectById(device_orgnizationid);
+                data.put("orgnizationname",orgnization.getName());
+                data.put("orgnizationid",orgnization.getId());
+                res.add(data);
+            }
+        }
+        return res;
+
+
+
+    }
+
+    /*
      * @title :ListDevice
      * @Author :Lin
      * @Description :  根据登录账号角色的不同获取设备信息   仅限 HW or 项目管理员 or 组织管理员
@@ -55,15 +103,25 @@ public class DeviceServiceImpl implements DeviceService {
      **/
     @Override
     @PreAuthorize("hasRole('OA') or hasRole('HW') or hasRole('PA')")
-    public Collection<Device> ListDevice(){
+    public ArrayList<Map<String, Object>> ListDevice(){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User user = (User)authentication.getPrincipal();
+        ArrayList<Map<String, Object>> res = new ArrayList<>();
         if (!ObjectUtils.isEmpty(user)){
             //HW：所有设备信息
             if (user.isHW()){
                 LambdaQueryWrapper<Device> lqw = new LambdaQueryWrapper<Device>();
                 List<Device> devices = deviceMapper.selectList(lqw);
-                return devices;
+                for (Device device : devices) {
+                    Map<String, Object> data = new HashMap<String, Object>();
+                    data.put("device",device);
+                    Integer orgnizationid = deviceMapper.SelectOrgnizationId(device.getId());
+                    Orgnization orgnization = orgnizationMapper.selectById(orgnizationid);
+                    data.put("orgnizationname",orgnization.getName());
+                    data.put("orgnizationid",orgnization.getId());
+                    res.add(data);
+                }
+                return res;
             }
 
             //项目管理员：所管理项目下的所有组织的设备信息
@@ -73,7 +131,17 @@ public class DeviceServiceImpl implements DeviceService {
                 lqw.eq(Project::getAdminId,user.getId());
                 Project project = projectMapper.selectOne(lqw);
                 Collection<Device> devices = ListDeviceByProjectId(project.getProjectId());
-                return devices;
+                for (Device device : devices) {
+                    Map<String, Object> data = new HashMap<String, Object>();
+                    data.put("device",device);
+                    Integer orgnizationid = deviceMapper.SelectOrgnizationId(device.getId());
+                    Orgnization orgnization = orgnizationMapper.selectById(orgnizationid);
+                    data.put("orgnizationname",orgnization.getName());
+                    data.put("orgnizationid",orgnization.getId());
+                    res.add(data);
+
+                }
+                return res;
             }
 
             //组织管理员：所管理的组织下的设备信息
@@ -83,8 +151,14 @@ public class DeviceServiceImpl implements DeviceService {
                 lqw.eq(Orgnization::getAdminAccount,user.getUsername());
                 Orgnization orgnization = orgnizationMapper.selectOne(lqw);
                 Collection<Device> devices = ListDeviceByOrignizationId(orgnization.getId());
-
-                return devices;
+                for (Device device : devices) {
+                    Map<String, Object> data = new HashMap<String, Object>();
+                    data.put("device",device);
+                    data.put("orgnizationname",orgnization.getName());
+                    data.put("orgnizationid",orgnization.getId());
+                    res.add(data);
+                }
+                return res;
             }
         }
         throw new RuntimeException("用户不存在,请先登录");

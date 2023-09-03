@@ -1,10 +1,7 @@
 package com.example.disinfectplatfrom.Controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.example.disinfectplatfrom.Pojo.Device;
-import com.example.disinfectplatfrom.Pojo.Orgnization;
-import com.example.disinfectplatfrom.Pojo.Project;
-import com.example.disinfectplatfrom.Pojo.User;
+import com.example.disinfectplatfrom.Pojo.*;
 import com.example.disinfectplatfrom.Service.DeviceService;
 import com.example.disinfectplatfrom.Service.OrgnizationService;
 import com.example.disinfectplatfrom.Service.UserService;
@@ -12,6 +9,7 @@ import com.example.disinfectplatfrom.Utils.R;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.util.JSONPObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
@@ -22,6 +20,7 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author : Lin
@@ -169,9 +168,9 @@ public class Mocha_itomController {
     @PreAuthorize("hasAuthority('device_management')")
     @RequestMapping(value = "/ListDevice",method = RequestMethod.GET)
     public R ListDevice(){
-        Collection<Device> devices = deviceService.ListDevice();
-        if (!ObjectUtils.isEmpty(devices)){
-            return R.ok(devices);
+        ArrayList<Map<String, Object>> res = deviceService.ListDevice();
+        if (!ObjectUtils.isEmpty(res)){
+            return R.ok(res);
         }
         return R.fail(null);
     }
@@ -186,11 +185,17 @@ public class Mocha_itomController {
      **/
     @PreAuthorize("hasAuthority('device_management')")
     @RequestMapping(value = "/SelectDevice",method = RequestMethod.POST)
-    public R SelectDevice(){
+    public R SelectDevice(@RequestBody Map<String,Object> data){
+        if (!ObjectUtils.isEmpty(data)){
+            String sn = (String)data.get("sn");
+            Integer orgnizationid = (Integer)data.get("organizationid");
+            Integer attribute = (Integer)data.get("attribute");
+            Integer status =  (Integer)data.get("status");
+            String name = (String)data.get("name");
+            ArrayList<Map<String, Object>> devices = deviceService.SelectDevice(sn, orgnizationid, attribute, status, name);
 
-
-
-
+            return R.ok(devices);
+        }
         return R.fail(null);
     }
 
@@ -204,8 +209,16 @@ public class Mocha_itomController {
      **/
     @PreAuthorize("hasAuthority('device_management')")
     @RequestMapping(value = "/AddDevice",method = RequestMethod.POST)
-    public R AddDevice(Device device){
-
+    public R AddDevice(@RequestBody Map<String,Object>data){
+        if (!ObjectUtils.isEmpty(data)){
+            String sn = (String)data.get("SN");
+            String device_name = (String)data.get("device_name");
+            String locate = (String)data.get("locate");
+            Integer organizationid = (Integer) data.get("organizationid");
+            Device device = new Device(sn, device_name, locate);
+            deviceService.AddDevice(device,organizationid);
+            return R.ok(null);
+        }
 
         return R.fail(null);
     }
@@ -219,7 +232,7 @@ public class Mocha_itomController {
      * @return :com.example.disinfectplatfrom.Utils.R
      **/
     @PreAuthorize("hasAuthority('device_management')")
-    @RequestMapping(value = "/AddDevice",method = RequestMethod.POST)
+    @RequestMapping(value = "/AddDevices",method = RequestMethod.POST)
     public R AddDevices(){
 
 

@@ -87,8 +87,12 @@ public interface UserService {
     //新增角色
     public void AddRole(Role role, Integer projectid, List<Integer> authorities,Integer quantity,List<Integer> orgnizations);
 
-    //查询项目下的角色
+    //通过项目id查询项目下的角色
     public ArrayList ListRolesByProjectId(Integer projectid);
 
+    //查询项目下的角色
+    public ArrayList ListRoles();
 
+
+    List<Authority> ListMenusByRoleid(Integer roleid);
 }

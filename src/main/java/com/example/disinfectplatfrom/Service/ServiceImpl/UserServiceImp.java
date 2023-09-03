@@ -596,13 +596,14 @@ public class UserServiceImp implements UserService {
     /*
      * @title :ListRolesByProjectId
      * @Author :Lin
-     * @Description : 查询项目下有什么角色信息    仅限拥有角色管理权限的账户
+     * @Description : 通过项目id查询项目下有什么角色信息     仅限拥有角色管理权限的账户
      * @Date :11:00 2023/3/16
      * @Param :[projectid]
      * @return :void
      **/
-    @PreAuthorize("hasAuthority('role_management')")
+
     @Override
+    @PreAuthorize("hasAuthority('role_management')")
     public ArrayList ListRolesByProjectId(Integer projectid){
 
         ArrayList<Map<String, Object>> res = new ArrayList<>();
@@ -620,5 +621,61 @@ public class UserServiceImp implements UserService {
         return res;
     }
 
+    /*
+     * @title :ListRoles
+     * @Author :Lin
+     * @Description : 查询项目下有什么角色信息  仅限拥有HW or 项目管理员
+     * HW：所有项目下的角色信息   项目管理员：所管理项目下的角色信息
+     * @Date :20:27 2023/9/1
+     * @Param :[]
+     * @return :java.util.ArrayList
+     **/
+    @PreAuthorize("hasRole('HW') or hasRole('PA')")
+    @Override
+    public ArrayList ListRoles(){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User user = (User)authentication.getPrincipal();
+        ArrayList res = new ArrayList<>();
+        if (user.isHW()){
+            //HW
+            //查询所有项目下的角色信息
+            Collection<Project> projects = ListAllProject();
+            for (Project project : projects) {
+                ArrayList arrayList = ListRolesByProjectId(project.getProjectId());
+                res.addAll(arrayList);
+            }
+        }else{
+            //PA
+            //查询PA所管理的项目下的角色信息
+            //先根据userid查出该用户是哪个项目的管理员
+            LambdaQueryWrapper<Project> lqw = new LambdaQueryWrapper<Project>();
+            lqw.eq(Project::getAdminId,user.getId());
+            Project project = projectMapper.selectOne(lqw);
+            res = ListRolesByProjectId(project.getProjectId());
+        }
+
+
+
+        return res ;
+    }
+
+
+    /*
+     * @title :ListMenusByRoleid
+     * @Author :Lin
+     * @Description : 通过roleid查询角色权限 仅限HW or PA
+     * @Date :10:13 2023/9/2
+     * @Param :[roleid]
+     * @return :java.util.List<com.example.disinfectplatfrom.Pojo.Authority>
+     **/
+    @PreAuthorize("hasRole('HW') or hasRole('PA')")
+    @Override
+    public List<Authority> ListMenusByRoleid(Integer roleid){
+        Collection<Integer> menuids = roleMapper.ListMenusByRoleid(roleid);
+        LambdaQueryWrapper<Authority> lqw = new LambdaQueryWrapper<Authority>();
+        lqw.in(Authority::getId,menuids);
+        List<Authority> authorities = authorityMapper.selectList(lqw);
+        return authorities;
+    }
 
 }

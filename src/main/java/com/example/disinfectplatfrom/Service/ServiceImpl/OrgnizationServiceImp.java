@@ -7,6 +7,8 @@ import com.example.disinfectplatfrom.Pojo.User;
 import com.example.disinfectplatfrom.Service.OrgnizationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 
@@ -37,12 +39,28 @@ public class OrgnizationServiceImp implements OrgnizationService {
      * @Param :[]
      * @return :java.util.Collection<com.example.disinfectplatfrom.Pojo.Orgnization>
      **/
-    @PreAuthorize("hasRole('PA')")
+    @PreAuthorize("hasRole('PA') or hasRole('OA') or hasRole(HW)")
     @Override
     public Collection<Orgnization> ListAllOrgnization() {
         LambdaQueryWrapper<Orgnization> lqw = new LambdaQueryWrapper<Orgnization>();
         List<Orgnization> orgnizations = orgnizationMapper.selectList(lqw);
-        return orgnizations;
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User user = (User)authentication.getPrincipal();
+        if (user.isHW() || user.isPA()){
+            return orgnizations;
+        }else{
+            for (Orgnization orgnization : orgnizations) {
+                orgnization.setAdminAccount(null);
+                orgnization.setCharacteristic(null);
+                orgnization.setContact(null);
+                orgnization.setLocate(null);
+                orgnization.setName(null);
+                orgnization.setPhonenumber(null);
+                orgnization.setRemark(null);
+            }
+            return orgnizations;
+        }
+
     }
 
 

@@ -27,4 +27,7 @@ public interface DeviceMapper extends BaseMapper<Device> {
 
     @Insert("INSERT INTO orgnization_device VALUES(NULL,#{orgnizationid},#{deviceid})")
     public void AddOrgnization_Device(Integer orgnizationid,Integer deviceid);
+
+    @Select("SELECT orgnization_id from orgnization_device where device_id=#{deviceid}")
+    public Integer SelectOrgnizationId(Integer deviceid);
 }

@@ -27,4 +27,5 @@ public class Authority {
     private Timestamp updateTime;
     private Integer delFlag;
     private String remark;
+    
 }

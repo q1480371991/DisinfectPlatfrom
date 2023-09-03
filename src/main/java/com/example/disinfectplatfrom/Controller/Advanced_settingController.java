@@ -13,6 +13,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.*;
 
+import javax.websocket.server.PathParam;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -188,21 +189,67 @@ public class Advanced_settingController {
 
 
     /*
-     * @title :ListRolesBy
+     * @title :ListRoles
      * @Author :Lin
      * @Description : 查询项目下有什么角色信息    仅限拥有角色管理权限的账户
+     * HW：所有项目下的角色信息   项目管理员：所管理项目下的角色信息
      * @Date :17:40 2023/7/15
      * @Param :[projectid]
      * @return :com.example.disinfectplatfrom.Utils.R
      **/
-    @RequestMapping(value = "/ListRolesBy",method = RequestMethod.GET)
-    public R ListRolesBy(@RequestParam Integer projectid){
-        if (!ObjectUtils.isEmpty(projectid)){
-            ArrayList data = userService.ListRolesByProjectId(projectid);
+    @PreAuthorize("hasAuthority('role_management')")
+    @RequestMapping(value = "/ListRoles",method = RequestMethod.GET)
+    public R ListRoles(){
+        ArrayList data = userService.ListRoles();
+        if (!ObjectUtils.isEmpty(data)){
             return R.ok(data);
         }
+
+        return R.fail(null,"项目下没有角色");
+    }
+
+
+    /*
+     * @title :ListRilesByProjectid
+     * @Author :Lin
+     * @Description : 通过项目id查询项目下有什么角色信息    仅限HW
+     * @Date :21:08 2023/9/1
+     * @Param :[projectid]
+     * @return :com.example.disinfectplatfrom.Utils.R
+     **/
+    @PreAuthorize("hasAuthority('role_management') and hasRole('HW')")
+    @RequestMapping(value = "/ListRilesByProjectid",method = RequestMethod.GET)
+    public R ListRilesByProjectid(@PathParam("projectid") Integer projectid){
+        if (!ObjectUtils.isEmpty(projectid)){
+            ArrayList arrayList = userService.ListRolesByProjectId(projectid);
+            return R.ok(arrayList);
+        }
+
+
+
         return R.fail(null);
     }
+
+    /*
+     * @title :ListMenusByRoleid
+     * @Author :Lin
+     * @Description : 通过roleid查询角色权限  仅限HW or PA
+     * @Date :10:07 2023/9/2
+     * @Param :[roleid]
+     * @return :com.example.disinfectplatfrom.Utils.R
+     **/
+    @RequestMapping(value = "/ListMenusByRoleid",method = RequestMethod.GET)
+    @PreAuthorize("hasAuthority('role_management')")
+    public R ListMenusByRoleid(@PathParam("roleid") Integer roleid){
+        if (!ObjectUtils.isEmpty(roleid)){
+
+        }
+
+
+        return R.fail(null);
+    }
+
+
 
     /*
      * @title :AddRole
@@ -274,21 +321,7 @@ public class Advanced_settingController {
         return R.fail(null);
     }
 
-    /*
-     * @title :ListRoles
-     * @Author :Lin
-     * @Description : 查询项目下有什么角色信息    仅限拥有角色管理权限的账户
-     * @Date :16:45 2023/7/16
-     * @Param :[projectid]
-     * @return :com.example.disinfectplatfrom.Utils.R
-     **/
-    @RequestMapping(value = "/ListRoles",method = RequestMethod.GET)
-    public R ListRoles(@RequestParam("projectid") Integer projectid){
-        if (!ObjectUtils.isEmpty(projectid)){
-            return R.ok(userService.ListRolesByProjectId(projectid));
-        }
-        return R.fail(null);
-    }
+
 
     /*
      * @title :CheckUserName

@@ -35,15 +35,13 @@ public class TestController {
     @Autowired
     DeviceService deviceService;
     @RequestMapping(value = "test")
-//    @PreAuthorize("hasAuthority('data_analysis')")
+
     public R test() throws IOException {
-        Collection<Device> devices = deviceService.ListDevice();
-        System.out.println(devices.size());
 
 
-        return new R(devices);
+        return new R(null);
     }
-//    @PreAuthorize("hasRole('HW')")
+
     @RequestMapping(value = "test1",method = RequestMethod.POST)
     public R test1(@RequestBody String data) throws IOException {
         return R.ok(null);

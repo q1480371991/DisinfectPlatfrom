@@ -1,6 +1,7 @@
 package com.example.disinfectplatfrom.Pojo;
 
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import lombok.Data;
 
@@ -26,4 +27,13 @@ public class Device {
     private Integer temperature;
     private Integer uv;
     private Integer mode;
+    @TableField(value = "SN")
+    private String SN;
+    private Integer attribute;
+
+    public Device(String sn, String device_name, String locate) {
+        this.SN=sn;
+        this.deviceName=device_name;
+        this.locate=locate;
+    }
 }

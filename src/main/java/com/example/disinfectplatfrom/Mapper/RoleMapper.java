@@ -20,4 +20,8 @@ public interface RoleMapper extends BaseMapper<Role> {
     public void AddRole_Orgnization(Integer roleid,Integer orgnizationid);
 
     public Collection<Map<Integer,String>>ListRolesByOrgnizationId(Integer orgnizationid);
+
+
+    @Select("SELECT menu_id from role_menu where role_id=#{roleid}")
+    public Collection<Integer> ListMenusByRoleid(Integer roleid);
 }
