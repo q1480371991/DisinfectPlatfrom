@@ -2,6 +2,7 @@ package com.example.disinfectplatfrom.Pojo;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
 import java.sql.Timestamp;
@@ -18,6 +19,7 @@ import java.util.Date;
  * @updateRemark : 描述说明本次修改内容
  */
 @Data
+@TableName(value = "menu")
 public class Authority {
     @TableId(value = "id", type = IdType.AUTO)
     private Integer id;
@@ -27,5 +29,5 @@ public class Authority {
     private Timestamp updateTime;
     private Integer delFlag;
     private String remark;
-    
+    private Integer disabled;
 }

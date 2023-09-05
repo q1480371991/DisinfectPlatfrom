@@ -1,6 +1,7 @@
 package com.example.disinfectplatfrom.Service;
 
 import com.example.disinfectplatfrom.Pojo.*;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.parameters.P;
 
@@ -85,7 +86,7 @@ public interface UserService {
     public boolean CheckUserName(String username);
 
     //新增角色
-    public void AddRole(Role role, Integer projectid, List<Integer> authorities,Integer quantity,List<Integer> orgnizations);
+    public void AddRole(Role role,  List<Integer> authorities,Integer quantity);
 
     //通过项目id查询项目下的角色
     public ArrayList ListRolesByProjectId(Integer projectid);
@@ -94,5 +95,13 @@ public interface UserService {
     public ArrayList ListRoles();
 
 
-    List<Authority> ListMenusByRoleid(Integer roleid);
+
+    //查询所有权限 仅限HW or PA
+    public List<Authority> ListAllMenus();
+
+    //通过roleid查询角色权限 仅限HW or PA
+    public List<Authority> ListMenusByRoleid(Integer roleid);
+
+    @PreAuthorize("hasRole('PA')")
+    void UpdateRole(Role role, List<Integer> authorities, Integer quantity);
 }

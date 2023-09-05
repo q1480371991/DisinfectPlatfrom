@@ -23,4 +23,7 @@ public interface AuthorityMapper extends BaseMapper<Authority> {
 
     @Select("SELECT * FROM menu WHERE id IN (SELECT menu_id FROM role_menu WHERE role_id=#{roleid} )")
     public Collection<Authority> ListAuthoritiesByRoleId(int roleid);
+
+    @Select("SELECT menu_id FROM role_menu WHERE role_id=#{roleid} ")
+    public Collection<Integer> ListAuthoritiesidsByRoleId(Integer roleid);
 }

@@ -571,39 +571,49 @@ public class UserServiceImp implements UserService {
     /*
      * @title :AddRole
      * @Author :Lin
-     * @Description : 增加角色，并维护角色与项目、组织、权限的关系     仅限拥有角色管理权限的用户
+     * @Description : 增加角色，并维护角色与项目、组织、权限的关系     仅限PA
      * @Date :14:10 2023/3/11
-     * @Param :[role, projectid, authorities, quantity, orgnizationids]
+     * @Param :[role,authorities, quantity]
      * @return :void
      **/
-    @PreAuthorize("hasAuthority('role_management')")
+    @PreAuthorize("hasRole('PA')")
     @Override
-    public void AddRole(Role role, Integer projectid,
-                        List<Integer> authorities,Integer quantity,
-                        List<Integer> orgnizationids) {
-        roleMapper.insert(role);
-        //该项目下有什么角色
-        projectMapper.AddProject_Roles(projectid,role.getId(),quantity);
-        //该角色对某些组织有数据权限
-        for (Integer orgnizationid : orgnizationids) {
-            roleMapper.AddRole_Orgnization(role.getId(),orgnizationid);
+    public void AddRole(Role role, List<Integer> authorities,Integer quantity) {
+        if (!ObjectUtils.isEmpty(role)||!ObjectUtils.isEmpty(authorities)||!ObjectUtils.isEmpty(quantity)){
+            //通过当前用户查询项目id
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            User user = (User)authentication.getPrincipal();
+            LambdaQueryWrapper<Project> lqw = new LambdaQueryWrapper<Project>();
+            lqw.eq(Project::getAdminId,user.getId());
+            Project project = projectMapper.selectOne(lqw);
+            Integer projectid = project.getProjectId();
+
+            //插入角色
+            roleMapper.insert(role);
+            //该项目下有什么角色
+            projectMapper.AddProject_Roles(projectid,role.getId(),quantity);
+            //该角色对某些组织有数据权限  暂时不考虑
+//        for (Integer orgnizationid : orgnizationids) {
+//            roleMapper.AddRole_Orgnization(role.getId(),orgnizationid);
+//        }
+            //该角色有什么权限
+            for (Integer authority : authorities) {
+                authorityMapper.AddRole_Menu(role.getId(),authority);
+            }
         }
-        //该角色有什么权限
-        for (Integer authority : authorities) {
-            authorityMapper.AddRole_Menu(role.getId(),authority);
-        }
+
     }
     /*
      * @title :ListRolesByProjectId
      * @Author :Lin
-     * @Description : 通过项目id查询项目下有什么角色信息     仅限拥有角色管理权限的账户
+     * @Description : 通过项目id查询项目下有什么角色信息     仅限HW or PA
      * @Date :11:00 2023/3/16
      * @Param :[projectid]
      * @return :void
      **/
 
     @Override
-    @PreAuthorize("hasAuthority('role_management')")
+    @PreAuthorize("hasRole('PA') or hasRole('HW')")
     public ArrayList ListRolesByProjectId(Integer projectid){
 
         ArrayList<Map<String, Object>> res = new ArrayList<>();
@@ -660,6 +670,26 @@ public class UserServiceImp implements UserService {
     }
 
 
+
+
+
+    /*
+     * @title :ListAllMenus
+     * @Author :Lin
+     * @Description : 查询所有权限 仅限HW or PA
+     * @Date :16:09 2023/9/3
+     * @Param :[]
+     * @return :java.util.List<com.example.disinfectplatfrom.Pojo.Authority>
+     **/
+    @Override
+    @PreAuthorize("hasRole('HW') or hasRole('PA')")
+    public List<Authority> ListAllMenus(){
+        LambdaQueryWrapper<Authority> lqw = new LambdaQueryWrapper<Authority>();
+        List<Authority> authorities = authorityMapper.selectList(lqw);
+        return authorities;
+    }
+
+
     /*
      * @title :ListMenusByRoleid
      * @Author :Lin
@@ -676,6 +706,53 @@ public class UserServiceImp implements UserService {
         lqw.in(Authority::getId,menuids);
         List<Authority> authorities = authorityMapper.selectList(lqw);
         return authorities;
+    }
+
+
+    /*
+     * @title :UpdateRole
+     * @Author :Lin
+     * @Description : 修改角色，并维护角色与项目、组织、权限的关系     仅限PA
+     * @Date :21:39 2023/9/4
+     * @Param :[role, authorities, quantity]
+     * @return :void
+     **/
+    @Override
+    @PreAuthorize("hasRole('PA')")
+    public void UpdateRole(Role role, List<Integer> authorities,Integer quantity){
+        if (!ObjectUtils.isEmpty(role)||!ObjectUtils.isEmpty(authorities)||!ObjectUtils.isEmpty(quantity)){
+            //通过当前用户查询项目id
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            User user = (User)authentication.getPrincipal();
+            LambdaQueryWrapper<Project> lqw = new LambdaQueryWrapper<Project>();
+            lqw.eq(Project::getAdminId,user.getId());
+            Project project = projectMapper.selectOne(lqw);
+            Integer projectid = project.getProjectId();
+
+            //更新最大人数
+            Project_Role project_role = projectMapper.SelectProject_Role(projectid, role.getId());
+            if (quantity<project_role.getCurrentAccount()){
+                throw new RuntimeException("角色最大人数小于当前角色人数");
+            }
+            projectMapper.UpdateProjectRoleMax(projectid,role.getId(),quantity);
+
+            //修改角色
+            roleMapper.updateById(role);
+
+            //先删除角色原来的权限
+            LambdaQueryWrapper<Authority> aulqw = new LambdaQueryWrapper<Authority>();
+            Collection<Integer> menuids = authorityMapper.ListAuthoritiesidsByRoleId(role.getId());
+            for (Integer menuid : menuids) {
+                roleMapper.DelectRole_Menu(role.getId(),menuid);
+            }
+
+            //然后加入新权限
+            for (Integer authorityid : authorities) {
+                authorityMapper.AddRole_Menu(role.getId(),authorityid);
+            }
+
+
+        }
     }
 
 }

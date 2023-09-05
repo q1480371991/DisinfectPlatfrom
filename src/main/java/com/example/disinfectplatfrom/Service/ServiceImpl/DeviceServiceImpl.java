@@ -160,6 +160,9 @@ public class DeviceServiceImpl implements DeviceService {
                 }
                 return res;
             }
+            // 非 HW or PA or OA  普通角色，根据所拥有的组织数据权限给出对应组织下的设备信息
+
+
         }
         throw new RuntimeException("用户不存在,请先登录");
     }

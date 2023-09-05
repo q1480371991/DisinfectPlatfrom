@@ -2,6 +2,7 @@ package com.example.disinfectplatfrom.Mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.example.disinfectplatfrom.Pojo.Role;
+import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
@@ -24,4 +25,8 @@ public interface RoleMapper extends BaseMapper<Role> {
 
     @Select("SELECT menu_id from role_menu where role_id=#{roleid}")
     public Collection<Integer> ListMenusByRoleid(Integer roleid);
+
+    @Delete("DELETE FROM role_menu WHERE role_id=#{roleid} AND menu_id=#{menuid}")
+    public void DelectRole_Menu(Integer roleid,Integer menuid);
+
 }

@@ -20,8 +20,12 @@ public interface ProjectMapper extends BaseMapper<Project> {
     @Insert("INSERT INTO project_user VALUES(NULL,#{projectid},#{userid})")
     public void AddProject_User(Integer projectid,Integer userid);
 
+
     @Update("UPDATE project_roles SET current_account=#{currentaccount} WHERE role_id=#{roleid} AND project_id=#{projectid}")
     public void UpdateProjectRoleAccount(Integer currentaccount,Integer projectid,Integer roleid);
+
+    @Update("UPDATE project_roles SET max_account=#{max} WHERE role_id=#{roleid} AND project_id=#{projectid}")
+    public void UpdateProjectRoleMax(Integer projectid,Integer roleid,Integer max);
 
     @Select("SELECT * FROM project_roles WHERE project_id=#{projectid}")
     public Collection<Project_Role> ListProject_RoleByProjectid(Integer projectid);

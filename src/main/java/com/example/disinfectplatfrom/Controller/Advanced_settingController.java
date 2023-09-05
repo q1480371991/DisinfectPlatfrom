@@ -1,4 +1,5 @@
 package com.example.disinfectplatfrom.Controller;
+import com.example.disinfectplatfrom.Pojo.Authority;
 import com.example.disinfectplatfrom.Pojo.Project;
 import com.example.disinfectplatfrom.Pojo.Role;
 import com.example.disinfectplatfrom.Pojo.User;
@@ -18,6 +19,7 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -210,7 +212,7 @@ public class Advanced_settingController {
 
 
     /*
-     * @title :ListRilesByProjectid
+     * @title :ListRolesByProjectid
      * @Author :Lin
      * @Description : 通过项目id查询项目下有什么角色信息    仅限HW
      * @Date :21:08 2023/9/1
@@ -218,16 +220,30 @@ public class Advanced_settingController {
      * @return :com.example.disinfectplatfrom.Utils.R
      **/
     @PreAuthorize("hasAuthority('role_management') and hasRole('HW')")
-    @RequestMapping(value = "/ListRilesByProjectid",method = RequestMethod.GET)
-    public R ListRilesByProjectid(@PathParam("projectid") Integer projectid){
+    @RequestMapping(value = "/ListRolesByProjectid",method = RequestMethod.GET)
+    public R ListRolesByProjectid(@PathParam("projectid") Integer projectid){
         if (!ObjectUtils.isEmpty(projectid)){
             ArrayList arrayList = userService.ListRolesByProjectId(projectid);
             return R.ok(arrayList);
         }
-
-
-
         return R.fail(null);
+    }
+
+
+    /*
+     * @title :ListAllMenus
+     * @Author :Lin
+     * @Description : 查询所有权限 仅限拥有角色管理权限的账户
+     * @Date :16:10 2023/9/3
+     * @Param :[]
+     * @return :com.example.disinfectplatfrom.Utils.R
+     **/
+    @RequestMapping(value = "/ListAllMenus",method = RequestMethod.GET)
+    @PreAuthorize("hasAuthority('role_management')")
+    public R ListAllMenus(){
+        List<Authority> authorities = userService.ListAllMenus();
+        return R.ok(authorities);
+
     }
 
     /*
@@ -242,7 +258,8 @@ public class Advanced_settingController {
     @PreAuthorize("hasAuthority('role_management')")
     public R ListMenusByRoleid(@PathParam("roleid") Integer roleid){
         if (!ObjectUtils.isEmpty(roleid)){
-
+            List<Authority> authorities = userService.ListMenusByRoleid(roleid);
+            return R.ok(authorities);
         }
 
 
@@ -254,27 +271,64 @@ public class Advanced_settingController {
     /*
      * @title :AddRole
      * @Author :Lin
-     * @Description :  添加一个项目下的角色   仅限拥有角色管理权限的账户    已解决前后端参数传递的问题
+     * @Description :  添加一个项目下的角色   仅限拥有角色管理权限的账户
      * @Date :17:52 2023/7/15
      * @Param :[role, projectid, authorities, quantity, orgnizationids]
      * @return :com.example.disinfectplatfrom.Utils.R
      **/
+    @PreAuthorize("hasAuthority('role_management')")
     @RequestMapping(value = "/AddRole",method = RequestMethod.POST)
     public R AddRole(@RequestBody String data) throws JsonProcessingException {
         if (!ObjectUtils.isEmpty(data)){
             ObjectMapper mapper = new ObjectMapper();
             JsonNode jsonNode = mapper.readTree(data);
             Role role = mapper.convertValue(jsonNode.get("role"), Role.class);
-            int projectid = jsonNode.get("projectid").asInt();
+
             ArrayList<Integer> authorities = mapper.convertValue(jsonNode.get("authorities"), ArrayList.class);
             int quantity = jsonNode.get("quantity").asInt();
-            ArrayList<Integer> orgnizationids = mapper.convertValue(jsonNode.get("orgnizationids"), ArrayList.class);
-            userService.AddRole(role,projectid,authorities,quantity,orgnizationids);
+
+
+            //暂不考虑数据权限：得重构数据库表
+//            ArrayList<Integer> orgnizationids = mapper.convertValue(jsonNode.get("orgnizationids"), ArrayList.class);
+            userService.AddRole(role,authorities,quantity);
             return R.ok(null);
         }
 
         return R.fail(null);
     }
+
+
+    /*
+     * @title :UpdateRole
+     * @Author :Lin
+     * @Description : 修改角色信息   仅限拥有角色管理权限的账户
+     * @Date :22:08 2023/9/4
+     * @Param :[data]
+     * @return :com.example.disinfectplatfrom.Utils.R
+     **/
+    @PreAuthorize("hasAuthority('role_management')")
+    @RequestMapping(value = "/UpdateRole",method = RequestMethod.POST)
+    public R UpdateRole(@RequestBody String data) throws JsonProcessingException {
+        if (!ObjectUtils.isEmpty(data)){
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode jsonNode = mapper.readTree(data);
+            Role role = mapper.convertValue(jsonNode.get("role"), Role.class);
+
+            ArrayList<Integer> authorities = mapper.convertValue(jsonNode.get("authorities"), ArrayList.class);
+            int quantity = jsonNode.get("quantity").asInt();
+
+            userService.UpdateRole(role,authorities,quantity);
+            return R.ok(null);
+        }
+
+
+        return R.fail(null);
+    }
+
+
+
+
+
 
     //账号管理
 
