@@ -341,6 +341,7 @@ public class Advanced_settingController {
      * @Param :[data]
      * @return :com.example.disinfectplatfrom.Utils.R
      **/
+    @PreAuthorize("hasAuthority('account_management')")
     @RequestMapping(value = "/SelectUser",method = RequestMethod.POST)
     public R SelectUser(@RequestBody Map<String, Object> data){
         if (!ObjectUtils.isEmpty(data)){
@@ -366,6 +367,7 @@ public class Advanced_settingController {
      * @Param :[]
      * @return :com.example.disinfectplatfrom.Utils.R
      **/
+    @PreAuthorize("hasAuthority('account_management')")
     @RequestMapping(value = "/ListUsers",method = RequestMethod.POST)
     public R ListUsers(){
         Collection<User> users = userService.ListUsers();
@@ -385,6 +387,7 @@ public class Advanced_settingController {
      * @Param :[username]
      * @return :com.example.disinfectplatfrom.Utils.R
      **/
+
     @RequestMapping(value="/CheckUserName",method = RequestMethod.GET)
     public R CheckUserName(@RequestParam("username")String username){
         if (!ObjectUtils.isEmpty(username)){
@@ -395,6 +398,24 @@ public class Advanced_settingController {
 
 
     /*
+     * @title :ListRolesByUserid
+     * @Author :Lin
+     * @Description : 通过userid获取 用户有什么角色
+     * @Date :23:08 2023/9/10
+     * @Param :[roleid]
+     * @return :com.example.disinfectplatfrom.Utils.R
+     **/
+    @RequestMapping(value="/ListRolesByUserid",method = RequestMethod.GET)
+    @PreAuthorize("hasAuthority('account_management')")
+    public R ListRolesByUserid(@RequestParam("roleid")Integer roleid){
+        if (!ObjectUtils.isEmpty(roleid)){
+            Collection<Role> roles = userService.ListRolesByUserid(roleid);
+            return R.ok(roles);
+        }
+        return R.fail(null);
+    }
+
+    /*
      * @title :AddProjectUser
      * @Author :Lin
      * @Description : 添加项目用户，仅限项目管理员   已解决前后端传参的问题
@@ -402,15 +423,16 @@ public class Advanced_settingController {
      * @Param :[data]
      * @return :com.example.disinfectplatfrom.Utils.R
      **/
+    @PreAuthorize("hasAuthority('account_management')")
     @RequestMapping(value = "/AddProjectUser",method = RequestMethod.POST)
     public R AddProjectUser(@RequestBody String data) throws JsonProcessingException {
         if (!ObjectUtils.isEmpty(data)){
             ObjectMapper mapper = new ObjectMapper();
             JsonNode jsonNode = mapper.readTree(data);
             User user = mapper.convertValue(jsonNode.get("user"), User.class);
-            int projectid = jsonNode.get("roleid").asInt();
             ArrayList<Integer> roleids = mapper.convertValue(jsonNode.get("roleid"), ArrayList.class);
-            userService.AddProjectUser(user,projectid,roleids);
+            userService.AddProjectUser(user,roleids);
+            return R.ok(null);
         }
         return R.fail(null);
     }

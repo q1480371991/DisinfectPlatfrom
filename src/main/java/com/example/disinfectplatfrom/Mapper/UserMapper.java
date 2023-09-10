@@ -26,4 +26,8 @@ public interface UserMapper extends BaseMapper<User> {
 
     @Insert("INSERT INTO user_role VALUES(NULL,#{userid},#{roleid})")
     public void AddUser_Role(Integer userid,Integer roleid);
+
+
+    @Select("SELECT role_id FROM user_role WHERE user_id=#{userid}")
+    public Collection<Integer> ListUserRolesid(Integer userid);
 }

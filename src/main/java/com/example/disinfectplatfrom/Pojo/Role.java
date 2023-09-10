@@ -23,6 +23,7 @@ public class Role {
     private Integer delFlag;
     private String createTime;
     private String updateTime;
+    private Integer disabled;
 
 
 }

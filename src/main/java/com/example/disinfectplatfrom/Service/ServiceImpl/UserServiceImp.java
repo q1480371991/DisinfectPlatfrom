@@ -200,8 +200,9 @@ public class UserServiceImp implements UserService {
     @Override
     public Collection<User> ListUsers(){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        User user = (User)authentication.getPrincipal();
-        if (user.isHW()){
+        User current_user = (User)authentication.getPrincipal();
+//        Collection<Map<String, Object>> maps = new HashSet<>();
+        if (current_user.isHW()){
             ArrayList<Integer> userids = new ArrayList<>();
             Collection<Project> projects = this.ListAllProject();
             for (Project project : projects) {
@@ -216,6 +217,9 @@ public class UserServiceImp implements UserService {
             return ListUserByProjectAdminId();
         }
     }
+
+
+
 
     /*
      * @title :ListAllProject
@@ -419,27 +423,56 @@ public class UserServiceImp implements UserService {
     }
 
     /*
+     * @title :ListRolesByUserid
+     * @Author :Lin
+     * @Description : 通过userid获取 用户有什么角色
+     * @Date :23:04 2023/9/8
+     * @Param :[userid]
+     * @return :java.util.Collection<com.example.disinfectplatfrom.Pojo.Role>
+     **/
+    @Override
+    @PreAuthorize("hasRole('PA')")
+    public Collection<Role> ListRolesByUserid(Integer userid){
+        Collection<Integer> roleids = userMapper.ListUserRolesid(userid);
+        LambdaQueryWrapper<Role> lqw = new LambdaQueryWrapper<Role>();
+        lqw.in(Role::getId,roleids);
+        List<Role> roles = roleMapper.selectList(lqw);
+        return roles ;
+    }
+
+    /*
      * @title :AddProjectUser
      * @Author :Lin
-     * @Description : 添加项目用户，仅限项目管理员   待改， roleid不知道是数组int还是单个int：
+     * @Description : 添加项目用户，仅限项目管理员PA
      * @Date :23:05 2023/3/6
      * @Param :[user]
      * @return :void
      **/
     @PreAuthorize("hasRole('PA')")
     @Override
-    public void AddProjectUser(User user,Integer projectid,ArrayList<Integer> roleids){
+    public void AddProjectUser(User user,ArrayList<Integer> roleids){
+        //获取当前PA所管理的项目id
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User currentuser = (User)authentication.getPrincipal();
+        LambdaQueryWrapper<Project> lqw = new LambdaQueryWrapper<Project>();
+        lqw.eq(Project::getAdminId,currentuser.getId());
+        Project project = projectMapper.selectOne(lqw);
+        Integer projectid = project.getProjectId();
         //先查询该项目下该角色的信息
         for (Integer roleid : roleids) {
             Project_Role project_role = projectMapper.SelectProject_Role(projectid, roleid);
             //判断
             if (project_role.getCurrentAccount()<project_role.getMaxAccount()){
+                //用户的角色
+                Role role = roleMapper.selectById(roleid);
                 //当前角色的数量小于最大数量，添加用户
+                user.setRemark(role.getRemark());
+                user.setPassword("{noop}"+user.getPassword());
                 userMapper.insert(user);
+                //将角色与用户关联
+                userMapper.AddUser_Role(user.getId(),roleid);
                 //将用户与项目关联
                 projectMapper.AddProject_User(projectid,user.getId());
-                //用户的角色
-                userMapper.AddUser_Role(user.getId(),roleid);
                 //更新该项目中该角色对应的current_account
                 project_role.setCurrentAccount(project_role.getCurrentAccount()+1);
                 projectMapper.UpdateProjectRoleAccount(project_role.getCurrentAccount(),project_role.getProjectId(),project_role.getRoleId());
@@ -448,6 +481,23 @@ public class UserServiceImp implements UserService {
                 throw new RuntimeException("当前角色role"+roleid+"数量已满");
             }
         }
+
+    }
+
+
+    /*
+     * @title :UpdateUser
+     * @Author :Lin
+     * @Description : 编辑项目用户，仅限项目管理员PA   未构思好
+     * @Date :23:10 2023/9/10
+     * @Param :[user, roleids]
+     * @return :void
+     **/
+    @Override
+    @PreAuthorize("hasRole('PA')")
+    public void UpdateUser(User user, ArrayList<Integer> roleids){
+        User olduser = userMapper.selectById(user.getId());
+//        olduser.setUsername();
 
     }
 

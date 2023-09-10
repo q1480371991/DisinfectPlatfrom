@@ -62,11 +62,17 @@ public interface UserService {
     //小程序用户注册
     public void AddSmallRoutineUser(User user,Integer orgnizationid);
 
+    void UpdateUser(User user, ArrayList<Integer> roleids);
+
     //添加组织管理员，仅限项目管理员
     public void AddOrgnizationAdmin(User user, Integer orgnizationid);
 
+
+    //通过userid获取 用户有什么角色
+    Collection<Role> ListRolesByUserid(Integer userid);
+
     //添加项目用户，仅限项目管理员
-    public void AddProjectUser(User user,Integer projectid,ArrayList<Integer> roleids);
+    public void AddProjectUser(User user,ArrayList<Integer> roleids);
 
     //添加组织 仅项目管理员
     public void AddOrganization(Orgnization orgnization);
@@ -92,7 +98,7 @@ public interface UserService {
     public ArrayList ListRolesByProjectId(Integer projectid);
 
     //查询项目下的角色
-    public ArrayList ListRoles();
+    public ArrayList<Role> ListRoles();
 
 
 
@@ -103,5 +109,6 @@ public interface UserService {
     public List<Authority> ListMenusByRoleid(Integer roleid);
 
     @PreAuthorize("hasRole('PA')")
+    //更新角色信息 仅限PA
     void UpdateRole(Role role, List<Integer> authorities, Integer quantity);
 }
