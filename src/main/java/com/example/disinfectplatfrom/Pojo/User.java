@@ -11,6 +11,8 @@ import org.springframework.util.ObjectUtils;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Objects;
+
 /**
  * @author : Lin
  * @version : [v1.0]
@@ -113,6 +115,7 @@ public class User implements UserDetails {
         return true;
     }
 
+
     @JsonIgnore
     public Boolean isHW(){
         String hw="ROLE_HW";
@@ -143,6 +146,41 @@ public class User implements UserDetails {
                 return true;
             }
         }
+        return false;
+    }
+
+
+
+//    @Override
+//    public boolean equals(Object obj) {
+//        return obj instanceof User && Objects.equals(this.username, ((User) obj).username);
+//    }
+//
+//
+//
+//    @Override
+//    public int hashCode() {
+//        return this.username.hashCode();
+//    }
+
+//    @Override
+//    public boolean equals(Object obj) {
+//        return this.toString().equals(obj.toString());
+//    }
+
+    @Override
+    public int hashCode() {
+        return username.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object rhs) {
+        System.out.println("equals");
+        if (rhs instanceof User) {
+            System.out.println("true");
+            return username.equals(((User) rhs).username);
+        }
+        System.out.println("false");
         return false;
     }
 }

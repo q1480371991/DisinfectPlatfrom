@@ -1,5 +1,6 @@
 package com.example.disinfectplatfrom;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.example.disinfectplatfrom.Mapper.*;
 import com.example.disinfectplatfrom.Pojo.*;
@@ -41,11 +42,11 @@ public class tset {
     OrgnizationMapper orgnizationMapper;
     @Test
     public void test1(){
-//        Role role = new Role(null, "q", "0", 0, "2023-07-14 21:20:09", "2023-07-14 21:20:09");
-//        int insert = roleMapper.insert(role);
-//        System.out.println(role.getId());
+        LambdaQueryWrapper<User> lqw = new LambdaQueryWrapper<User>();
+        lqw.eq(User::getId,1);
+        lqw.select(User.class, info -> !info.getColumn().equals("password"));
+        User user = userMapper.selectOne(lqw);
+        System.out.println(user);
 
-        ArrayList<Object> objects = new ArrayList<>();
-        System.out.println(objects.size());
     }
 }

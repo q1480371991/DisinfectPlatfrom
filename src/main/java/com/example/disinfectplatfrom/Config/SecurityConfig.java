@@ -15,6 +15,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 
 import org.springframework.security.web.authentication.RememberMeServices;
@@ -33,6 +34,7 @@ import javax.sql.DataSource;
 import java.util.*;
 
 @Configuration
+//@EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
@@ -107,7 +109,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .sessionManagement()//开启会话管理
 
                 .maximumSessions(1)//单点登录未测试
-                .maxSessionsPreventsLogin(true)
+                .maxSessionsPreventsLogin(false)
+                .expiredSessionStrategy(new CustomExpiredSessionStrategy())
                 .expiredSessionStrategy((event -> {
                     System.out.println("单点登录");
                     HttpServletResponse response = event.getResponse();
@@ -154,6 +157,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 //
 //        return source;
 //    }
+
+
 //    //监听会话
     @Bean
     public HttpSessionEventPublisher httpSessionEventPublisher(){
@@ -171,6 +176,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     public RememberMeServices rememberMeServices(){
         return new MyPersistentTokenBasedRemeberMeServiceImpl(UUID.randomUUID().toString(),userDetailsService(), persistentTokenRepository());
     }
+
     @Bean
     @Override
     public AuthenticationManager authenticationManagerBean() throws Exception {

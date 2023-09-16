@@ -141,6 +141,7 @@ public class UserServiceImp implements UserService {
     public Collection<User> ListUserByProjectId(Integer projectid, Integer flag) {
         List<User> users;
         LambdaQueryWrapper<User> userlqw = new LambdaQueryWrapper<User>();
+        userlqw.select(User.class, info -> !info.getColumn().equals("password"));
         Collection<Integer> userids = userMapper.ListUserIdInProjectById(projectid);
         if (flag==1){
             Project project = projectMapper.selectById(projectid);
@@ -176,6 +177,7 @@ public class UserServiceImp implements UserService {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User currentUser = (User)authentication.getPrincipal();
         LambdaQueryWrapper<Project> lqw = new LambdaQueryWrapper<Project>();
+
         //查没有被逻辑删除的项目
         lqw.eq(Project::getDelFlag,0);
         lqw.select(Project::getId).eq(Project::getAdminId,currentUser.getId());
@@ -210,6 +212,7 @@ public class UserServiceImp implements UserService {
                 userids.addAll(userids1);
             }
             LambdaQueryWrapper<User> userlqw = new LambdaQueryWrapper<User>();
+            userlqw.select(User.class, info -> !info.getColumn().equals("password"));
             userlqw.in(User::getId,userids);
             List<User> users = userMapper.selectList(userlqw);
             return users;
@@ -368,6 +371,7 @@ public class UserServiceImp implements UserService {
     public Collection<User> ListUserByOrgnizationId(int projectid) {
         Collection<Integer> userids = userMapper.ListUserIdInOrgnizationById(projectid);
         LambdaQueryWrapper<User> lqw = new LambdaQueryWrapper<User>();
+        lqw.select(User.class, info -> !info.getColumn().equals("password"));
         lqw.in(User::getId,userids);
         List<User> users = userMapper.selectList(lqw);
         return users;
