@@ -1,5 +1,6 @@
 package com.example.disinfectplatfrom.Handler;
 
+import com.example.disinfectplatfrom.Pojo.User;
 import com.example.disinfectplatfrom.Utils.R;
 import com.example.disinfectplatfrom.Utils.code;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -30,10 +31,11 @@ public class MyLogoutSuccessHandler implements LogoutSuccessHandler {
     @Override
     public void onLogoutSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
         R r = new R();
-        System.out.println("注销成功");
+        User user  =(User) authentication.getPrincipal();
+        System.out.println(user.getUsername()+"注销成功");
         r.setCode(code.LOGOUT_OK);
-        r.setData(authentication.getPrincipal());
-        r.setMsg("注销成功");
+        r.setData(user);
+        r.setMsg(user.getUsername()+"注销成功");
         response.setStatus(HttpStatus.OK.value());
         response.setContentType("application/json;charset=UTF-8");
         String s = new ObjectMapper().writeValueAsString(r);

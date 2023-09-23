@@ -29,12 +29,13 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import javax.annotation.Resources;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
 import java.util.*;
 
 @Configuration
-//@EnableWebSecurity
+@EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
@@ -81,6 +82,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http.authorizeHttpRequests()
                 .mvcMatchers("/vc.jpg").permitAll()
+                .mvcMatchers("/isLogin").permitAll()
                 .mvcMatchers("/test").permitAll()
                 .mvcMatchers("/test1").permitAll()
                 .mvcMatchers("/doLogin").permitAll()
@@ -92,10 +94,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                 .rememberMe() //开启记住我功能
                 .rememberMeServices(rememberMeServices())//设置自动登录使用哪个 rememberMeServices
+                .tokenValiditySeconds(60*60*24*7)//记住我7天
 //                .tokenRepository(persistentTokenRepository())
-                .and()
-                .cors()//跨域处理方案
-                .configurationSource(corsConfiguration())
+//                .and()
+//                .cors()//跨域处理方案
+//                .configurationSource(corsConfiguration())
 //                处理未认证、权限不足
                 .and()
                 .exceptionHandling()
@@ -106,6 +109,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 //                .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
                 .disable()
 
+//                .and()
                 .sessionManagement()//开启会话管理
 
                 .maximumSessions(1)//单点登录未测试
@@ -130,15 +134,16 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 
     //springsecurity跨域处理方案
-    @Bean
+//    @Bean
     CorsConfigurationSource corsConfiguration(){
 
+//        10.33.112.88
         CorsConfiguration corsConfiguration = new CorsConfiguration();
-        corsConfiguration.setAllowedHeaders(Arrays.asList("*"));
-        corsConfiguration.setAllowedMethods(Arrays.asList("*"));
         corsConfiguration.setAllowedOrigins(Arrays.asList("http://localhost:5173"));
-        corsConfiguration.setAllowCredentials(true);
-        corsConfiguration.setMaxAge(3600L);
+        corsConfiguration.setAllowedMethods(Arrays.asList("*")); // 允许的请求方法
+        corsConfiguration.setAllowedHeaders(Arrays.asList("*")); // 允许的请求头
+        corsConfiguration.setAllowCredentials(true); // 允许携带凭据
+        corsConfiguration.setMaxAge(3600L); // 预检请求的有效期，单位为秒
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**",corsConfiguration);
         return source;

@@ -5,6 +5,12 @@ spring:
     username: root
     password: "020623"
     type: com.alibaba.druid.pool.DruidDataSource
+
+server:
+  port: 8085
+#  servlet:
+#    session:
+#      timeout: 1m
 #mybatis-plus:
 #  configuration:
 #    map-underscore-to-camel-case: false

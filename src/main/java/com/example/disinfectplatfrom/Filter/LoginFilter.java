@@ -44,9 +44,6 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
             try {
                 Map<String, Object> userInfo = new ObjectMapper().readValue(request.getInputStream(), Map.class);
                 System.out.println(userInfo);
-//                String data = userInfo.get("data");
-//                Map<String, Object> Info=new ObjectMapper().readValue(data, Map.class);
-//                System.out.println(Info);
                 String kaptchaParameter = getKaptchaParameter();
                 String usernameParameter = getUsernameParameter();
                 String passwordParameter = getPasswordParameter();
