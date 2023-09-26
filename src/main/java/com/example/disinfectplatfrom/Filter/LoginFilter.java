@@ -1,16 +1,22 @@
 package com.example.disinfectplatfrom.Filter;
 
+import com.example.disinfectplatfrom.Pojo.User;
 import com.example.disinfectplatfrom.exception.KaptchaNotMatchException;
+import com.example.disinfectplatfrom.session.MySessionRegistryImpl;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.rememberme.AbstractRememberMeServices;
 import org.springframework.util.ObjectUtils;
 
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -22,7 +28,8 @@ import java.util.Map;
 public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     public static final String FORM_KAPTCHA_KEY="kaptcha";
     private String kaptchaParameter=FORM_KAPTCHA_KEY;
-
+    @Autowired
+    private MySessionRegistryImpl sessionRegistry;
     public String getKaptchaParameter() {
         return kaptchaParameter;
     }
@@ -69,7 +76,9 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
                     //验证码通过，认证
                     UsernamePasswordAuthenticationToken authRequest = new UsernamePasswordAuthenticationToken(username, password);
                     setDetails(request, authRequest);
-                    return this.getAuthenticationManager().authenticate(authRequest);
+                    Authentication authenticate = this.getAuthenticationManager().authenticate(authRequest);
+                    sessionRegistry.registerNewSession(request.getSession().getId(),authenticate.getPrincipal());
+                    return authenticate;
                 }
 
             } catch (IOException e) {
@@ -80,4 +89,10 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         throw new KaptchaNotMatchException("验证码不匹配！");
     }
 
+    @Override
+    protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authResult) throws IOException, ServletException {
+        User user = (User) authResult.getPrincipal();
+
+        super.successfulAuthentication(request, response, chain, authResult);
+    }
 }

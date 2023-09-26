@@ -174,13 +174,11 @@ public class User implements UserDetails {
     }
 
     @Override
-    public boolean equals(Object rhs) {
-        System.out.println("equals");
-        if (rhs instanceof User) {
-            System.out.println("true");
-            return username.equals(((User) rhs).username);
+    public boolean equals(Object o){
+        User user= (User) o;
+        if(user.getUsername().equals(this.username)) {
+            return true;
         }
-        System.out.println("false");
         return false;
     }
 }

@@ -42,11 +42,13 @@ public class tset {
     OrgnizationMapper orgnizationMapper;
     @Test
     public void test1(){
-        LambdaQueryWrapper<User> lqw = new LambdaQueryWrapper<User>();
-        lqw.eq(User::getId,1);
-        lqw.select(User.class, info -> !info.getColumn().equals("password"));
-        User user = userMapper.selectOne(lqw);
-        System.out.println(user);
+        User user1 = new User();
+        user1.setUsername("root");
+        User user2 = new User();
+        user2.setUsername("root");
+
+        boolean equals = user1.equals(user1);
+        System.out.println(equals);
 
     }
 }

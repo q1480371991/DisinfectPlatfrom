@@ -1,5 +1,6 @@
-package com.example.disinfectplatfrom.Config;
+package com.example.disinfectplatfrom.session;
 
+import com.example.disinfectplatfrom.Utils.R;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.security.web.DefaultRedirectStrategy;
 import org.springframework.security.web.RedirectStrategy;
@@ -29,11 +30,10 @@ public class CustomExpiredSessionStrategy implements SessionInformationExpiredSt
 
     @Override
     public void onExpiredSessionDetected(SessionInformationExpiredEvent event) throws IOException, ServletException {
-        HashMap<String , Object> map = new HashMap<>();
-        map.put("code",403);
-        map.put("msg","被迫下线");
-
-        String json = objectMapper.writeValueAsString(map);
+        R r = new R();
+        r.setCode(403);
+        r.setMsg("被迫下线");
+        String json = objectMapper.writeValueAsString(r);
         event.getResponse().setContentType("application/json;charset=utf-8");
         event.getResponse().getWriter().write(json);
     }

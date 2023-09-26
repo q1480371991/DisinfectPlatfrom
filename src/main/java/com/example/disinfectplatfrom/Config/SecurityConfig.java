@@ -2,15 +2,14 @@ package com.example.disinfectplatfrom.Config;
 
 import com.example.disinfectplatfrom.Filter.LoginFilter;
 import com.example.disinfectplatfrom.Handler.*;
-import com.example.disinfectplatfrom.Pojo.User;
 import com.example.disinfectplatfrom.Service.MyUserDetailService;
 import com.example.disinfectplatfrom.Service.ServiceImpl.MyPersistentTokenBasedRemeberMeServiceImpl;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.example.disinfectplatfrom.session.CustomExpiredSessionStrategy;
+import com.example.disinfectplatfrom.session.MyConcurrentSessionFilter;
+import com.example.disinfectplatfrom.session.MySessionRegistryImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
@@ -18,19 +17,18 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 
+import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.web.authentication.RememberMeServices;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.rememberme.JdbcTokenRepositoryImpl;
 import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
-import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+import org.springframework.security.web.authentication.session.ConcurrentSessionControlAuthenticationStrategy;
+import org.springframework.security.web.session.ConcurrentSessionFilter;
 import org.springframework.security.web.session.HttpSessionEventPublisher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import javax.annotation.Resources;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
 import java.util.*;
 
@@ -42,6 +40,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private final DataSource dataSource;
 
     private final MyUserDetailService myUserDetailService;
+
+    @Autowired
+    SessionRegistry sessionRegistry;
 
     @Autowired
     private MyAuthenticationSuccessHandler myAuthenticationSuccessHandler;
@@ -109,23 +110,28 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 //                .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
                 .disable()
 
-//                .and()
+
+                .addFilterAt(new ConcurrentSessionFilter(sessionRegistry,new CustomExpiredSessionStrategy()),ConcurrentSessionFilter.class)
                 .sessionManagement()//开启会话管理
 
                 .maximumSessions(1)//单点登录未测试
+
+                //当达到最大值时，是否保留已经登录的用户
                 .maxSessionsPreventsLogin(false)
-                .expiredSessionStrategy(new CustomExpiredSessionStrategy())
-                .expiredSessionStrategy((event -> {
-                    System.out.println("单点登录");
-                    HttpServletResponse response = event.getResponse();
-                    Map<String, Object> res = new HashMap<>();
-                    res.put("status",500);
-                    res.put("msg","当前会话已经失效,请重新登录！");
-                    String s = new ObjectMapper().writeValueAsString(res);
-                    response.setContentType("application/json;charset=UTF-8");
-                    response.getWriter().println(s);
-                    response.flushBuffer();
-                }))
+                .expiredUrl("/login2");
+
+//                .expiredSessionStrategy(new CustomExpiredSessionStrategy())
+//                .expiredSessionStrategy((event -> {
+//                    System.out.println("单点登录");
+//                    HttpServletResponse response = event.getResponse();
+//                    Map<String, Object> res = new HashMap<>();
+//                    res.put("status",500);
+//                    res.put("msg","当前会话已经失效,请重新登录！");
+//                    String s = new ObjectMapper().writeValueAsString(res);
+//                    response.setContentType("application/json;charset=UTF-8");
+//                    response.getWriter().println(s);
+//                    response.flushBuffer();
+//                }))
 
                 ;
 
@@ -136,8 +142,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     //springsecurity跨域处理方案
 //    @Bean
     CorsConfigurationSource corsConfiguration(){
-
-//        10.33.112.88
         CorsConfiguration corsConfiguration = new CorsConfiguration();
         corsConfiguration.setAllowedOrigins(Arrays.asList("http://localhost:5173"));
         corsConfiguration.setAllowedMethods(Arrays.asList("*")); // 允许的请求方法
@@ -169,6 +173,24 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     public HttpSessionEventPublisher httpSessionEventPublisher(){
         return new HttpSessionEventPublisher();
     }
+
+    @Bean
+    public MyConcurrentSessionFilter myConcurrentSessionFilter(){
+        MyConcurrentSessionFilter filter = new MyConcurrentSessionFilter(sessionRegistry,customExpiredSessionStrategy()  );
+        return filter;
+    }
+
+    @Bean
+    public CustomExpiredSessionStrategy customExpiredSessionStrategy(){
+        return new CustomExpiredSessionStrategy();
+    }
+
+    @Bean
+    public SessionRegistry sessionRegistry() {
+        return new MySessionRegistryImpl();
+    }
+
+
     //指定数据库持久化
     @Bean
     public PersistentTokenRepository persistentTokenRepository(){
@@ -200,6 +222,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
         loginFilter.setAuthenticationSuccessHandler(myAuthenticationSuccessHandler);//认证成功处理
         loginFilter.setAuthenticationFailureHandler(myAuthenticationFailureHandler);//认证失败处理
+
+
+        loginFilter.setSessionAuthenticationStrategy(new ConcurrentSessionControlAuthenticationStrategy(sessionRegistry));
         return loginFilter;
     }
 

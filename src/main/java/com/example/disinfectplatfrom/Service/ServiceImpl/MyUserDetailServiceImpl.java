@@ -8,6 +8,7 @@ import com.example.disinfectplatfrom.Pojo.Authority;
 import com.example.disinfectplatfrom.Pojo.Role;
 import com.example.disinfectplatfrom.Pojo.User;
 import com.example.disinfectplatfrom.Service.MyUserDetailService;
+import com.example.disinfectplatfrom.session.MySessionRegistryImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -25,6 +26,8 @@ public class MyUserDetailServiceImpl implements MyUserDetailService {
     @Autowired
     private AuthorityMapper authorityMapper;
 
+
+
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         //查询用户的基本信息
@@ -39,7 +42,6 @@ public class MyUserDetailServiceImpl implements MyUserDetailService {
         //查询用户的authority字符串
         Collection<Authority> authorities = authorityMapper.ListAuthoritiesByUserId(user.getId());
         user.setAuthorities(authorities);
-        System.out.println();
 
         return user;
     }
